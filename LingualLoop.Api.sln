@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LingualLoop.Api", "LingualLoop.Api\LingualLoop.Api.csproj", "{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postgres", "Postgres\Postgres.csproj", "{F95F1823-4F4C-40D3-8E58-77C342E8523A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{4F6F398B-7139-4D3A-920A-598CB28C511D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{87E0BF64-34F4-4DBF-BFB4-7582C5AA9CCC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F95F1823-4F4C-40D3-8E58-77C342E8523A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F95F1823-4F4C-40D3-8E58-77C342E8523A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F95F1823-4F4C-40D3-8E58-77C342E8523A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F95F1823-4F4C-40D3-8E58-77C342E8523A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F6F398B-7139-4D3A-920A-598CB28C511D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F6F398B-7139-4D3A-920A-598CB28C511D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F6F398B-7139-4D3A-920A-598CB28C511D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F6F398B-7139-4D3A-920A-598CB28C511D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4F6F398B-7139-4D3A-920A-598CB28C511D} = {87E0BF64-34F4-4DBF-BFB4-7582C5AA9CCC}
+		{F95F1823-4F4C-40D3-8E58-77C342E8523A} = {87E0BF64-34F4-4DBF-BFB4-7582C5AA9CCC}
+		{4E9CCDD6-D58D-40A5-9228-75DDF83C91D5} = {87E0BF64-34F4-4DBF-BFB4-7582C5AA9CCC}
+	EndGlobalSection
+EndGlobal
