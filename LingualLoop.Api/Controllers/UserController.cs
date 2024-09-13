@@ -36,4 +36,11 @@ public class UserController : ControllerBase
         var response = await _mediator.Send(new CreateUserRequest() { UserName = request.UserName});
         return Ok(response);
     }
+    
+    [HttpPut("{id}/score")]
+    public async Task<IActionResult> UpdateUserScore([FromRoute] int id, [FromBody] int point)
+    {
+        var response = await _mediator.Send(new UpdateScoreRequest() { UserId = id, Point = point });
+        return Ok();
+    }
 }
