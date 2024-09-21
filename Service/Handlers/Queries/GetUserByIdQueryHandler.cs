@@ -1,3 +1,7 @@
+using System.Net;
+using Common.Enums;
+using Common.Exceptions;
+using Common.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Postgres;
@@ -22,12 +26,18 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdRequest, GetUs
     public async Task<GetUserByIdResponse> Handle(GetUserByIdRequest request, CancellationToken cancellationToken)
     {
         var user = await _genericRepository.FirstAsync(u => u.UserId == request.UserId,
-            user => new User() { UserId = user.UserId, UserName = user.UserName, UserScore = user.UserScore});
+            user => new User() { UserId = user.UserId, UserNickname = user.UserNickname, UserScore = user.UserScore});
 
+        if (user is null)
+        {
+            throw new LingualLoopException(ErrorCode.NoDataInUser.CreateMessage(request.UserId),
+                ErrorCode.NoDataInUser.GetDescription(request.UserId), HttpStatusCode.BadRequest);
+        }
+        
         return new GetUserByIdResponse()
         {
-            UserId = user!.UserId,
-            UserName = user.UserName,
+            UserId = user.UserId,
+            UserNickname = user.UserNickname,
             UserScore = user.UserScore
         };
     }

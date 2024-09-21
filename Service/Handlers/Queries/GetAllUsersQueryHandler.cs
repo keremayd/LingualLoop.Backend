@@ -26,7 +26,7 @@ public class GetAllUsersQueryHandler: IRequestHandler<GetAllUsersRequest, List<G
         var userResponses = users.Select(u => new GetAllUsersResponse
         {
             UserId = u.UserId,
-            UserName = u.UserName,
+            UserNickname = u.UserNickname,
         }).ToList();
 
         return userResponses;

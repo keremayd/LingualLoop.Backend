@@ -9,23 +9,23 @@ using Postgres.Models;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Responses;
 
-namespace Service.Handlers.Commands;
+namespace Service.Handlers.Queries;
 
-public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, UpdateScoreResponse>
+public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, GetScoreByIdResponse>
 {
     private readonly ILingualLoopGenericRepository<User> _genericRepository;
     private readonly LingualLoopContext _context;
-    
-    public UpdateScoreCommandHandler(ILingualLoopGenericRepository<User> genericRepository)
+
+    public GetScoreByIdQueryHandler(ILingualLoopGenericRepository<User> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();
     }
     
-    public async Task<UpdateScoreResponse> Handle(UpdateScoreRequest request, CancellationToken cancellationToken)
+    public async Task<GetScoreByIdResponse> Handle(GetScoreByIdRequest request, CancellationToken cancellationToken)
     {
         var user = await _genericRepository.FirstAsync(u => u.UserId == request.UserId,
-            user => new User() { UserId = user.UserId, UserNickname = user.UserNickname, UserScore = user.UserScore});
+            user => new User() { UserId = user.UserId, UserScore = user.UserScore});
 
         if (user is null)
         {
@@ -33,14 +33,10 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
                 ErrorCode.NoDataInUser.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         
-        user.UserScore.Score += request.Point;
-        
-        _genericRepository.Update(user);
-        await _genericRepository.SaveChangesAsync(cancellationToken);
-        
-        return new UpdateScoreResponse()
+        return new GetScoreByIdResponse()
         {
-            UserId = request.UserId
+            UserId = user.UserId,
+            UserScore = user.UserScore
         };
     }
 }

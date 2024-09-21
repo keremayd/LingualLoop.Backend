@@ -10,8 +10,8 @@ public class User
     [Column("user_id")]
     public int UserId { get; set; }
 
-    [Column("user_name")]
-    public string UserName { get; set; } = string.Empty;
+    [Column("user_nickname")]
+    public string UserNickname { get; set; } = string.Empty;
 
     // One-to-Many: One User can have many UserScore
     public UserScore UserScore { get; set; } = new UserScore();
