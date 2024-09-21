@@ -1,3 +1,4 @@
+using LingualLoop.Api.Middlewares;
 using Postgres.Extensions;
 using Service.Handlers.Queries;
 
@@ -21,6 +22,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
+using Service.DataTransferObjects.Responses;
 using Service.Handlers.Commands;
 
 namespace LingualLoop.Api.Controllers;
@@ -38,9 +39,14 @@ public class UserController : ControllerBase
     }
     
     [HttpPut("{id}/score")]
-    public async Task<IActionResult> UpdateUserScore([FromRoute] int id, [FromBody] int point)
+    public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateUserScore([FromRoute] int id, [FromBody] int point)
     {
         var response = await _mediator.Send(new UpdateScoreRequest() { UserId = id, Point = point });
-        return Ok();
+        
+        return Ok(new ApiResponse<UpdateScoreResponse>()
+        {
+            Data = response,
+            Message = "User puanı güncellendi."
+        });
     }
 }
