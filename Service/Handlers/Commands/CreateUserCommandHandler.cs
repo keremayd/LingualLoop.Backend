@@ -42,8 +42,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserRequest, Creat
         var response = await _genericRepository.SaveChangesAsync(cancellationToken);
         if (response == 0)
         {
-            throw new LingualLoopException(ErrorCode.NoDataCreatedInUser.CreateMessage(request.UserNickname),
-                ErrorCode.NoDataCreatedInUser.GetDescription(request.UserNickname), HttpStatusCode.InternalServerError);
+            throw new LingualLoopException(ErrorCode.NoDataCreatedInUsers.CreateMessage(request.UserNickname),
+                ErrorCode.NoDataCreatedInUsers.GetDescription(request.UserNickname), HttpStatusCode.InternalServerError);
         }
 
         return new CreateUserResponse()

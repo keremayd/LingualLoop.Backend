@@ -15,4 +15,6 @@ public class User
 
     // One-to-Many: One User can have many UserScore
     public UserScore UserScore { get; set; } = new UserScore();
+
+    public ICollection<UserVideoHistory>? VideoHistory { get; set; }
 }

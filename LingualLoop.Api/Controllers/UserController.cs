@@ -70,16 +70,4 @@ public class UserController : ControllerBase
             Message = "User başarıyla oluşturuldu."
         });
     }
-    
-    [HttpPut("{id}/score")]
-    public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateUserScore([FromRoute] int id, [FromBody] int point)
-    {
-        var response = await _mediator.Send(new UpdateScoreRequest() { UserId = id, Point = point });
-        
-        return Ok(new ApiResponse<UpdateScoreResponse>()
-        {
-            Data = response,
-            Message = "User puanı güncellendi."
-        });
-    }
 }

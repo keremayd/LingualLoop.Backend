@@ -30,8 +30,8 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdRequest, GetUs
 
         if (user is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataInUser.CreateMessage(request.UserId),
-                ErrorCode.NoDataInUser.GetDescription(request.UserId), HttpStatusCode.BadRequest);
+            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+                ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         
         return new GetUserByIdResponse()

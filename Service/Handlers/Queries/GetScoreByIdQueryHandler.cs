@@ -3,6 +3,7 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Postgres;
 using Postgres.Abstractions;
 using Postgres.Models;
@@ -29,8 +30,8 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
 
         if (user is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataInUser.CreateMessage(request.UserId),
-                ErrorCode.NoDataInUser.GetDescription(request.UserId), HttpStatusCode.BadRequest);
+            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+                ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         
         return new GetScoreByIdResponse()
