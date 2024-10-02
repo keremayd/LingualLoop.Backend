@@ -12,6 +12,12 @@ public class Question
 
     [Column("question_text")]
     public string QuestionText { get; set; } = string.Empty;
+    
+    [Column("min_score")]
+    public int MinScore { get; set; }
+    
+    [Column("max_score")]
+    public int MaxScore { get; set; }
 
     // Foreign Key
     [Column("video_id")]

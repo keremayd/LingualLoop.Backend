@@ -22,5 +22,5 @@ public class Video
     // One-to-Many: One Video can have many Questions
     //public ICollection<Question>? Questions { get; set; }
 
-    public ICollection<UserVideoHistory>? UserVideoHistories { get; set; }
+    //public ICollection<UserVideoHistory>? UserVideoHistories { get; set; }
 }

@@ -22,7 +22,7 @@ public class UserVideoHistory
     public DateTime WatchedDate { get; set; }  // DateTime olarak düzenlendi.
 
     [Column("watched_duration")]
-    public int WatchedDuration { get; set; }  // İzlenen süre saniye cinsinden olabilir.
+    public int? WatchedDuration { get; set; }  // İzlenen süre saniye cinsinden olabilir.
 
     // One-to-Many: Her izleme kaydı bir kullanıcıya ait.
     public User? User { get; set; }

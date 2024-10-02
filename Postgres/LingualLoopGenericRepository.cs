@@ -19,6 +19,16 @@ public class LingualLoopGenericRepository<TEntity> : ILingualLoopGenericReposito
         return _context;
     }
 
+    public async Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, TEntity>> selectFilter)
+    {
+        return await _context
+            .Set<TEntity>()
+            .AsNoTracking()
+            .Where(filter)
+            .Select(selectFilter)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<TEntity?>> GetAllUsersAsync(bool trackChanges)
     {
         return await _context

@@ -30,4 +30,7 @@ public enum ErrorCode
     
     [Description("Videos tablosunda kayıt oluşturulamadı! videourl = {0}, videotitle = {1}")]
     NoDataCreatedInVideos = 4109,
+    
+    [Description("Kullanıcının puanına uygun soru Questions tablosunda bulunamadı! userscore = {0}")]
+    NoDataFoundInQuestions = 4110,
 }
