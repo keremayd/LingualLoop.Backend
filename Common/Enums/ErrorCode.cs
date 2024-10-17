@@ -33,4 +33,10 @@ public enum ErrorCode
     
     [Description("Kullanıcının puanına uygun soru Questions tablosunda bulunamadı! userscore = {0}")]
     NoDataFoundInQuestions = 4110,
+    
+    [Description("Authentication gerçekleştirilemedi! Username veya password hatalı.")]
+    TheUserAuthenticatedFailed = 4111,
+    
+    [Description("Kullanıcının kaydı oluşturulamadı! username = {0}")]
+    TheUserNotCreatedInDatabase = 4112,
 }

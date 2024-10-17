@@ -25,9 +25,9 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
     
     public async Task<GetScoreByIdResponse> Handle(GetScoreByIdRequest request, CancellationToken cancellationToken)
     {
-        var user = await _genericRepository.FirstAsync(u => u.UserId == request.UserId,
-            user => new User() { UserId = user.UserId, UserScore = user.UserScore});
-
+        var user = await _genericRepository.FirstAsync(u => u.Id == request.UserId,
+            user => new User() { Id = user.Id, UserScore = user.UserScore});
+        
         if (user is null)
         {
             throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
@@ -36,7 +36,7 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
         
         return new GetScoreByIdResponse()
         {
-            UserId = user.UserId,
+            UserId = user.Id,
             UserScore = user.UserScore
         };
     }

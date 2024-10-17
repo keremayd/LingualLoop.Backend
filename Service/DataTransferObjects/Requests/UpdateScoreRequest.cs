@@ -5,6 +5,6 @@ namespace Service.DataTransferObjects.Requests;
 
 public class UpdateScoreRequest: IRequest<UpdateScoreResponse>
 {
-    public int UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public int Point { get; set; }
 }

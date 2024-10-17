@@ -21,8 +21,8 @@ public class VideoController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("watched/{userId:int}")]
-    public async Task<ActionResult<ApiResponse<GetWatchedVideosByUserResponse>>> GetWatchedVideosByUser([FromRoute] int userId)
+    [HttpGet("watched/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetWatchedVideosByUserResponse>>> GetWatchedVideosByUser([FromRoute] string userId)
     {
         var response = await _mediator.Send(new GetWatchedVideosByUserRequest() { UserId = userId });
         
@@ -43,8 +43,8 @@ public class VideoController : ControllerBase
         });
     }
 
-    [HttpPost("{videoId:int}/watch/{userId:int}")]
-    public async Task<ActionResult<ApiResponse<RecordWatchVideoByUserResponse>>> RecordWatchVideoByUser([FromRoute] int videoId, int userId)
+    [HttpPost("{videoId:int}/watch/{userId}")]
+    public async Task<ActionResult<ApiResponse<RecordWatchVideoByUserResponse>>> RecordWatchVideoByUser([FromRoute] int videoId, string userId)
     {
         var response = await _mediator.Send(new RecordWatchVideoByUserRequest() { VideoId = videoId, UserId = userId});
         

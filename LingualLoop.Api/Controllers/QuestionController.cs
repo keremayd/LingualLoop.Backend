@@ -20,8 +20,8 @@ public class QuestionController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("random/{userId:int}")]
-    public async Task<ActionResult<ApiResponse<GetQuestionByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] int userId)
+    [HttpGet("random/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetQuestionByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] string userId)
     {
         var userScoreResponse = await _mediator.Send(new GetScoreByIdRequest() { UserId = userId });
 

@@ -24,9 +24,9 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
     
     public async Task<UpdateScoreResponse> Handle(UpdateScoreRequest request, CancellationToken cancellationToken)
     {
-        var user = await _genericRepository.FirstAsync(u => u.UserId == request.UserId,
-            user => new User() { UserId = user.UserId, UserNickname = user.UserNickname, UserScore = user.UserScore});
-
+        var user = await _genericRepository.FirstAsync(u => u.Id == request.UserId,
+            user => new User() { Id = user.Id, UserNickname = user.UserNickname, UserScore = user.UserScore});
+        
         if (user is null)
         {
             throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),

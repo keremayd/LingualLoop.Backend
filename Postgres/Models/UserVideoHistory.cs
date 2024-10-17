@@ -12,7 +12,7 @@ public class UserVideoHistory
 
     [ForeignKey("User")]
     [Column("user_id")]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     [ForeignKey("Video")]
     [Column("video_id")]
@@ -28,5 +28,5 @@ public class UserVideoHistory
     public User? User { get; set; }
 
     // One-to-Many: Her izleme kaydı bir videoya ait.
-    //public Video? Video { get; set; }
+    public Video? Video { get; set; }
 }

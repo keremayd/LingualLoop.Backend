@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Postgres.Abstractions;
+using Postgres.Models;
 
 namespace Postgres;
 
@@ -8,10 +10,12 @@ public class LingualLoopGenericRepository<TEntity> : ILingualLoopGenericReposito
     where TEntity : class
 {
     private readonly LingualLoopContext _context;
-    
-    public LingualLoopGenericRepository(LingualLoopContext context)
+    private readonly UserManager<User> _userManager;
+
+    public LingualLoopGenericRepository(LingualLoopContext context, UserManager<User> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     public LingualLoopContext GetDbContext()

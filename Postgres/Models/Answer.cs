@@ -20,6 +20,8 @@ public class Answer
     [Column("question_id")]
     public int QuestionId { get; set; }
 
+    public Question? Question { get; set; }
+
     // Navigation Property: Many Answers belong to one Question
     // [ForeignKey("QuestionId")]
     // public Question? Question { get; set; }

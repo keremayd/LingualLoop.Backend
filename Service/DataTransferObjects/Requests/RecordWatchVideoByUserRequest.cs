@@ -6,5 +6,5 @@ namespace Service.DataTransferObjects.Requests;
 public class RecordWatchVideoByUserRequest : IRequest<RecordWatchVideoByUserResponse>
 {
     public int VideoId { get; set; }
-    public int UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }

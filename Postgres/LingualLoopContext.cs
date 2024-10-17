@@ -1,9 +1,12 @@
+using System.Reflection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Postgres.Configurations;
 using Postgres.Models;
 
 namespace Postgres;
 
-public class LingualLoopContext : DbContext
+public class LingualLoopContext : IdentityDbContext<User>
 {
     public LingualLoopContext()
     {

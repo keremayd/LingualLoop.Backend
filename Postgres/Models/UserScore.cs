@@ -16,13 +16,13 @@ public class UserScore
     // Foreign Keys
     [ForeignKey("UserId")]
     [Column("user_id")]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     //public User? User { get; set; }
     // [Column("answer_id")]
     // public int AnswerId { get; set; }
 
-    // // Navigation Properties
+    // Navigation Properties
     // [ForeignKey("UserId")]
     // public User? User { get; set; }
 

@@ -2,6 +2,6 @@ namespace Service.DataTransferObjects.Responses;
 
 public class GetAllUsersResponse
 {
-    public int UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public string? UserNickname { get; set; }
 }

@@ -24,9 +24,9 @@ public class GetWatchedVideosByUserQueryHandler : IRequestHandler<GetWatchedVide
     
     public async Task<GetWatchedVideosByUserResponse> Handle(GetWatchedVideosByUserRequest request, CancellationToken cancellationToken)
     {
-        var user = await _genericRepository.FirstAsync(u => u.UserId == request.UserId,
-            user => new User() { UserId = user.UserId, UserNickname = user.UserNickname, VideoHistory = user.VideoHistory});
-
+        var user = await _genericRepository.FirstAsync(u => u.Id == request.UserId,
+            user => new User() { Id = user.Id, UserNickname = user.UserNickname, VideoHistory = user.VideoHistory});
+        
         if (user is null)
         {
             throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
@@ -35,7 +35,7 @@ public class GetWatchedVideosByUserQueryHandler : IRequestHandler<GetWatchedVide
         
         return new GetWatchedVideosByUserResponse()
         {
-            UserId = user.UserId,
+            UserId = user.Id,
             UserNickname = user.UserNickname,
             UserVideoHistories = user.VideoHistory
         };

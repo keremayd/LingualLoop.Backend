@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Postgres.Models;
 
 [Table("users")]
-public class User
+public class User : IdentityUser
 {
-    [Key]
-    [Column("user_id")]
-    public int UserId { get; set; }
+    // [Key]
+    // [Column("user_id")]
+    // public int UserId { get; set; }
 
     [Column("user_nickname")]
     public string UserNickname { get; set; } = string.Empty;

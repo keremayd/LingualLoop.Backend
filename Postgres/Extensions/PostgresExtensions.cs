@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Postgres.Abstractions;
+using Postgres.Models;
 using Postgres.Options;
 
 namespace Postgres.Extensions;
@@ -21,7 +22,7 @@ public static class PostgresExtensions
             .AddRepositories()
             .AddEntityFrameworkNpgsql()
             .AddDbContext<LingualLoopContext>(options =>
-                options.UseNpgsql(postgresOptions.LingualLoopConnectionString), ServiceLifetime.Scoped);
+                options.UseNpgsql(postgresOptions.LingualLoopConnectionString, b => b.MigrationsAssembly("LingualLoop.Api")));
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)

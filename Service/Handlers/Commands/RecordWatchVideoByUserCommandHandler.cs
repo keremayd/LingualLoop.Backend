@@ -35,7 +35,7 @@ public class RecordWatchVideoByUserCommandHandler : IRequestHandler<RecordWatchV
                 WatchedDate = userVideoHistory.WatchedDate
             };
         }
-
+        
         //TODO mapper ile tür dönüşümü yapılacak
         var entity = new UserVideoHistory()
         {

@@ -1,10 +1,13 @@
 using LingualLoop.Api.Middlewares;
 using Postgres.Extensions;
+using Service.Extensions;
 using Service.Handlers.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddIdentity();
+builder.Services.AddJwt(builder.Configuration);
 builder.Services.AddPostgres(builder.Configuration);
 builder.Services.AddControllers();
 
@@ -27,6 +30,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

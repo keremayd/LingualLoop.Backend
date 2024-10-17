@@ -5,5 +5,5 @@ namespace Service.DataTransferObjects.Requests;
 
 public class GetUserByIdRequest: IRequest<GetUserByIdResponse>
 {
-    public int UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }

@@ -23,11 +23,11 @@ public class GetAllUsersQueryHandler: IRequestHandler<GetAllUsersRequest, List<G
         var users = await _genericRepository.GetAllUsersAsync(true);
         
         //TODO burası mapper olacak
-        var userResponses = users.Select(u => new GetAllUsersResponse
-        {
-            UserId = u.UserId,
-            UserNickname = u.UserNickname,
-        }).ToList();
+         var userResponses = users.Select(u => new GetAllUsersResponse
+         {
+             UserId = u.Id,
+             UserNickname = u.UserNickname,
+         }).ToList();
 
         return userResponses;
     }

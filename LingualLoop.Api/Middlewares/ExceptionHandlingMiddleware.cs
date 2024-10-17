@@ -1,5 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Common;
+using Common.Enums;
 using Common.Exceptions;
 using Newtonsoft.Json;
 
@@ -36,12 +37,18 @@ public class ExceptionHandlingMiddleware
         try
         {
             LingualLoopException lingualLoopException = (edInfo.SourceException as LingualLoopException)!;
+            var errorList = new
+            {
+                errorCode = lingualLoopException.ErrorList?.Select(x => x.ErrorCode).ToList(),
+                errorDescription = lingualLoopException.ErrorList?.Select(x => x.ErrorDescription).ToList()
+            };
             
             var error = new Dictionary<string, object?>
             {
                 ["data"] = lingualLoopException.ErrorData,
                 ["code"] = lingualLoopException.ErrorMessage?.ErrorCode.ToString(),
                 ["errorCode"] = lingualLoopException.ErrorMessage?.Code,
+                ["errorList"] = errorList,
                 ["message"] = lingualLoopException.ErrorMessage?.Message,
                 ["detailedMessage"] = lingualLoopException.InnerException?.Message,
             };

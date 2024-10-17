@@ -25,8 +25,20 @@ public class LingualLoopException: System.Exception
         this.ErrorData = errorData;
         this.LogLevel = logLevel;
     }
+    
+    public LingualLoopException(ErrorMessage errorMessage, List<ErrorList> errorList ,string message, HttpStatusCode? httpStatusCode = null, System.Exception? innerException = null, PriorityType logLevel = PriorityType.Error,  object? errorData = null)
+        : base(message, innerException)
+    {
+        this.ErrorMessage = errorMessage;
+        this.ErrorList = errorList;
+        this.HttpStatusCode = httpStatusCode;
+        this.ErrorData = errorData;
+        this.LogLevel = logLevel;
+    }
         
     public ErrorMessage? ErrorMessage { get; }
+    
+    public List<ErrorList>? ErrorList { get; }
         
     public HttpStatusCode? HttpStatusCode { get; }
         
