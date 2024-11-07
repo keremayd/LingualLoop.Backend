@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Common.Options;
 using MediatR;
@@ -9,10 +10,11 @@ using Microsoft.IdentityModel.Tokens;
 using Postgres.Abstractions;
 using Postgres.Models;
 using Service.DataTransferObjects.Requests;
+using Service.DataTransferObjects.Responses;
 
 namespace Service.Handlers.Commands;
 
-public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, string>
+public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, CreateTokenResponse>
 {
     private readonly UserManager<User> _userManager;
     private readonly JwtOptions? _jwtOptions;
@@ -67,12 +69,39 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, str
         return tokenOptions;
     }
 
-    public async Task<string> Handle(CreateTokenRequest request, CancellationToken cancellationToken)
+    private string GenerateRefreshToken()
     {
+        var randomNumber = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+    }
+
+    public async Task<CreateTokenResponse> Handle(CreateTokenRequest request, CancellationToken cancellationToken)
+    {
+        User _user = new User();
+        
         var signinCredentials = GetSigninCredentials();
         var claims = await GetClaims(request);
         var tokenOptions = GenerateTokenOptions(signinCredentials, claims);
 
-        return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+        var refreshToken = GenerateRefreshToken();
+        _user.RefreshToken = refreshToken;
+        
+        if (request.PopulateExp)
+            _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+
+        await _userManager.UpdateAsync(_user);
+        
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+
+        return new CreateTokenResponse()
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
     }
 }

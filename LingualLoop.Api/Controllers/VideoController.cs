@@ -3,6 +3,7 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Responses;
@@ -21,6 +22,7 @@ public class VideoController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize]
     [HttpGet("watched/{userId}")]
     public async Task<ActionResult<ApiResponse<GetWatchedVideosByUserResponse>>> GetWatchedVideosByUser([FromRoute] string userId)
     {
@@ -32,6 +34,7 @@ public class VideoController : ControllerBase
         });
     }
     
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ApiResponse<CreateVideoResponse>>> CreateVideo([FromBody] CreateVideoRequest request)
     {
@@ -43,6 +46,7 @@ public class VideoController : ControllerBase
         });
     }
 
+    [Authorize]
     [HttpPost("{videoId:int}/watch/{userId}")]
     public async Task<ActionResult<ApiResponse<RecordWatchVideoByUserResponse>>> RecordWatchVideoByUser([FromRoute] int videoId, string userId)
     {

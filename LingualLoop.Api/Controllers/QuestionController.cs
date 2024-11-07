@@ -3,6 +3,7 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Responses;
@@ -20,6 +21,7 @@ public class QuestionController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize]
     [HttpGet("random/{userId}")]
     public async Task<ActionResult<ApiResponse<GetQuestionByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] string userId)
     {

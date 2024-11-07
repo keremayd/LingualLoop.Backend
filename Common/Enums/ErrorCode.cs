@@ -39,4 +39,10 @@ public enum ErrorCode
     
     [Description("Kullanıcının kaydı oluşturulamadı! username = {0}")]
     TheUserNotCreatedInDatabase = 4112,
+    
+    [Description("Geçersiz veya süresi dolmuş refresh token. refreshtoken = {0}")]
+    InvalidOrExpiredRefreshToken = 4113,
+    
+    [Description("UserScores tablosunda kayıt bulunamadı. userid = {0}")]
+    NoDataInUserScores = 4114,
 }

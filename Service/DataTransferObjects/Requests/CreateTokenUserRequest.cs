@@ -3,8 +3,9 @@ using Service.DataTransferObjects.Responses;
 
 namespace Service.DataTransferObjects.Requests;
 
-public class CreateTokenRequest : IRequest<string>
+public class CreateTokenRequest : IRequest<CreateTokenResponse>
 {
-    public string UserName { get; set; }
-    public string Password { get; set; }
+    public string? UserName { get; set; }
+    public string? Password { get; set; }
+    public bool PopulateExp { get; set; }
 }

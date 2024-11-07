@@ -3,6 +3,7 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Responses;
@@ -40,15 +41,33 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<ApiResponse<object>>> Authenticate([FromBody] ValidateUserRequest request)
+    public async Task<ActionResult<ApiResponse<AuthenticateResponse>>> Authenticate([FromBody] ValidateUserRequest request)
     {
-        var response = await _mediator.Send(new ValidateUserRequest() { UserName = request.UserName, Password = request.Password });
+        var validateUserResponse = await _mediator.Send(new ValidateUserRequest() { UserName = request.UserName, Password = request.Password });
 
-        var tokenResponse = await _mediator.Send(new CreateTokenRequest() { UserName = request.UserName, Password = request.Password });
+        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { UserName = request.UserName, Password = request.Password, PopulateExp = true});
 
-        return Ok(new
+        return Ok(new ApiResponse<AuthenticateResponse>()
         {
-            Token = tokenResponse
+            Data = new AuthenticateResponse()
+            {
+                UserId = validateUserResponse.UserId,
+                AccessToken = createTokenResponse.AccessToken,
+                RefreshToken = createTokenResponse.RefreshToken
+            }
+        });
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<ApiResponse<CreateTokenResponse>>> Refresh([FromBody] TokenDto tokenDto)
+    {
+        var refreshTokenResponse = await _mediator.Send(new RefreshTokenRequest() { AccessToken = tokenDto.AccessToken, RefreshToken = tokenDto.RefreshToken});
+
+        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { UserName = refreshTokenResponse.UserName, Password = refreshTokenResponse.PasswordHash, PopulateExp = false});
+
+        return Ok(new ApiResponse<CreateTokenResponse>()
+        {
+            Data = createTokenResponse
         });
     }
 }

@@ -12,7 +12,7 @@ using Service.DataTransferObjects.Responses;
 
 namespace Service.Handlers.Commands;
 
-public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, bool>
+public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, ValidateUserResponse>
 {
     private readonly ILingualLoopGenericRepository<User> _genericRepository;
     private readonly LingualLoopContext _context;
@@ -25,7 +25,7 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, b
         _context = genericRepository.GetDbContext();
     }
 
-    public async Task<bool> Handle(ValidateUserRequest request, CancellationToken cancellationToken)
+    public async Task<ValidateUserResponse> Handle(ValidateUserRequest request, CancellationToken cancellationToken)
     {
         User u = new User()
         {
@@ -44,6 +44,9 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, b
             throw new LingualLoopException(ErrorCode.TheUserAuthenticatedFailed.CreateMessage(),
                 ErrorCode.TheUserAuthenticatedFailed.GetDescription(), HttpStatusCode.Unauthorized);
 
-        return true;
+        return new ValidateUserResponse()
+        {
+            UserId = user.Id
+        };
     }
 }

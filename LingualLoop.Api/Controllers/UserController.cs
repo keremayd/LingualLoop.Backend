@@ -11,6 +11,7 @@ using Service.Handlers.Commands;
 
 namespace LingualLoop.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("ll-api/users")]
 public class UserController : ControllerBase
@@ -32,7 +33,6 @@ public class UserController : ControllerBase
         });
     }
 
-    //[Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<GetUserByIdResponse>>> GetUserById([FromRoute] string id)
     {
@@ -41,6 +41,17 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<GetUserByIdResponse>()
         {
             Data = response
+        });
+    }
+    
+    [HttpPost("updateScore")]
+    public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateScoreById([FromBody] UpdateScoreRequest request)
+    {
+        var getUserByIdResponse = await _mediator.Send(new UpdateScoreRequest() { UserId = request.UserId, Point = request.Point});
+        
+        return Ok(new ApiResponse<UpdateScoreResponse>()
+        {
+            Data = getUserByIdResponse
         });
     }
     

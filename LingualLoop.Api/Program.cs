@@ -9,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentity();
 builder.Services.AddJwt(builder.Configuration);
 builder.Services.AddPostgres(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -18,6 +28,8 @@ builder.Services.AddMediatR(cfg=>cfg.RegisterServicesFromAssemblies(typeof(GetUs
 
 
 var app = builder.Build();
+
+app.UseCors("AllowAllOrigins");
 
 // Configure the HTTP byIdRequest pipeline.
 if (app.Environment.IsDevelopment())
