@@ -12,7 +12,7 @@ using Service.DataTransferObjects.Responses;
 
 namespace Service.Handlers.Queries;
 
-public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, GetScoreByIdResponse>
+public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, GetScoreWithLivesByIdResponse>
 {
     private readonly ILingualLoopGenericRepository<User> _genericRepository;
     private readonly LingualLoopContext _context;
@@ -23,7 +23,7 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
         _context = genericRepository.GetDbContext();
     }
     
-    public async Task<GetScoreByIdResponse> Handle(GetScoreByIdRequest request, CancellationToken cancellationToken)
+    public async Task<GetScoreWithLivesByIdResponse> Handle(GetScoreByIdRequest request, CancellationToken cancellationToken)
     {
         var user = await _genericRepository.FirstAsync(u => u.Id == request.UserId,
             user => new User() { Id = user.Id, UserScore = user.UserScore});
@@ -34,10 +34,10 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
                 ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         
-        return new GetScoreByIdResponse()
+        return new GetScoreWithLivesByIdResponse()
         {
             UserId = user.Id,
-            UserScore = user.UserScore
+            Score = user.UserScore.Score
         };
     }
 }

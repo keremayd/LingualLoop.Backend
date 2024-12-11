@@ -11,7 +11,7 @@ using Service.Handlers.Commands;
 
 namespace LingualLoop.Api.Controllers;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("ll-api/users")]
 public class UserController : ControllerBase
@@ -47,22 +47,49 @@ public class UserController : ControllerBase
     [HttpPost("updateScore")]
     public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateScoreById([FromBody] UpdateScoreRequest request)
     {
-        var getUserByIdResponse = await _mediator.Send(new UpdateScoreRequest() { UserId = request.UserId, Point = request.Point});
-        
+        var updateScoreResponse = await _mediator.Send(new UpdateScoreRequest() { UserId = request.UserId, Point = request.Point});
+
+        if (request.Point == -1)
+        {
+            var updateLivesResponse = await _mediator.Send(new UpdateLivesRequest() { UserId = request.UserId });
+            
+            return Ok(new ApiResponse<UpdateScoreResponse>()
+            {
+                Data = new UpdateScoreResponse()
+                {
+                    UserId = updateScoreResponse.UserId,
+                    Score = updateScoreResponse.Score,
+                    Lives = updateLivesResponse.Lives
+                }
+            });
+        }
+
         return Ok(new ApiResponse<UpdateScoreResponse>()
         {
-            Data = getUserByIdResponse
+            Data = new UpdateScoreResponse()
+            {
+                UserId = updateScoreResponse.UserId,
+                Score = updateScoreResponse.Score,
+            }
         });
     }
     
-    [HttpGet("{id}/score")]
-    public async Task<ActionResult<ApiResponse<GetScoreByIdResponse>>> GetScoreById([FromRoute] string id)
+    [HttpGet("{id}/score-with-lives")]
+    public async Task<ActionResult<ApiResponse<GetScoreWithLivesByIdResponse>>> GetScoreWithLivesById([FromRoute] string id)
     {
-        var response = await _mediator.Send(new GetScoreByIdRequest() { UserId = id });
+        var getScoreByIdResponse = await _mediator.Send(new GetScoreByIdRequest() { UserId = id });
+        
+        var getLivesByIdResponse = await _mediator.Send(new GetLivesByIdRequest() { UserId = id });
 
-        return Ok(new ApiResponse<GetScoreByIdResponse>()
+        return Ok(new ApiResponse<GetScoreWithLivesByIdResponse>()
         {
-            Data = response
+            Data = new GetScoreWithLivesByIdResponse()
+            {
+                UserId = id,
+                UserNickname = getScoreByIdResponse.UserNickname,
+                Score = getScoreByIdResponse.Score,
+                Lives = getLivesByIdResponse.Lives
+            }
         });
     }
 }

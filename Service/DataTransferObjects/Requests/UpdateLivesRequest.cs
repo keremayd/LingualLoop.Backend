@@ -3,7 +3,7 @@ using Service.DataTransferObjects.Responses;
 
 namespace Service.DataTransferObjects.Requests;
 
-public class GetScoreByIdRequest : IRequest<GetScoreWithLivesByIdResponse>
+public class UpdateLivesRequest : IRequest<UpdateLivesResponse>
 {
     public string UserId { get; set; } = string.Empty;
 }

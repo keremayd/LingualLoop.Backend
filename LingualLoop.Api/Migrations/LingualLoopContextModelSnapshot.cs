@@ -271,7 +271,7 @@ namespace LingualLoop.Api.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Id")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
@@ -292,7 +292,38 @@ namespace LingualLoop.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Postgres.Models.UserScore", b =>
+            modelBuilder.Entity("Postgres.Models.UserLives", b =>
+                {
+                    b.Property<int>("UserLivesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("user_lives_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserLivesId"));
+
+                    b.Property<DateTime?>("LastLivesResetTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_lives_reset_time");
+
+                    b.Property<int>("Lives")
+                        .HasColumnType("integer")
+                        .HasColumnName("lives");
+
+                    b.Property<int>("MaxLives")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_lives");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserLivesId");
+
+                    b.ToTable("user_lives");
+                });
+
+            modelBuilder.Entity("Postgres.Models.Score", b =>
                 {
                     b.Property<int>("UserScoreId")
                         .ValueGeneratedOnAdd()
@@ -455,11 +486,11 @@ namespace LingualLoop.Api.Migrations
                     b.Navigation("Video");
                 });
 
-            modelBuilder.Entity("Postgres.Models.UserScore", b =>
+            modelBuilder.Entity("Postgres.Models.Score", b =>
                 {
                     b.HasOne("Postgres.Models.User", null)
-                        .WithOne("UserScore")
-                        .HasForeignKey("Postgres.Models.UserScore", "UserId")
+                        .WithOne("Score")
+                        .HasForeignKey("Postgres.Models.Score", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -490,7 +521,7 @@ namespace LingualLoop.Api.Migrations
 
             modelBuilder.Entity("Postgres.Models.User", b =>
                 {
-                    b.Navigation("UserScore")
+                    b.Navigation("Score")
                         .IsRequired();
 
                     b.Navigation("VideoHistory");

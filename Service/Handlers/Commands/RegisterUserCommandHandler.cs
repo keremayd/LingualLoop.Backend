@@ -31,7 +31,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
             switch (error.Code)
             {
                 case "DuplicateUserName":
-                    errorDictionary["UserName"] = "Username is already taken.";
+                    errorDictionary["Id"] = "Username is already taken.";
                     break;
                 case "DuplicateEmail":
                     errorDictionary["Email"] = "Email is already registered.";
@@ -51,6 +51,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
 
     public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
     {
+        var refreshToken = CreateTokenCommandHandler.GenerateRefreshToken();
         User u = new User()
         {
             Email = request.Email,
@@ -58,6 +59,8 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
             UserNickname = request.UserNickname,
             PasswordHash = request.Password,
             PhoneNumber = request.PhoneNumber,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiryTime = DateTime.UtcNow,
             UserScore = {}
         };
         

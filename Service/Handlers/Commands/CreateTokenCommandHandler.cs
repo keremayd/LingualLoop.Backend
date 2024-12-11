@@ -38,13 +38,13 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, Cre
     {
         User u = new User()
         {
-            UserName = request.UserName,
+            UserName = request.Id,
             PasswordHash = request.Password
         };
         
         var claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, request.UserName)
+            new Claim(ClaimTypes.Name, request.Id)
         };
 
         var roles = await _userManager.GetRolesAsync(u);
@@ -69,7 +69,7 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, Cre
         return tokenOptions;
     }
 
-    private string GenerateRefreshToken()
+    public static string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
         using (var rng = RandomNumberGenerator.Create())
@@ -81,27 +81,26 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, Cre
 
     public async Task<CreateTokenResponse> Handle(CreateTokenRequest request, CancellationToken cancellationToken)
     {
-        User _user = new User();
-        
         var signinCredentials = GetSigninCredentials();
         var claims = await GetClaims(request);
         var tokenOptions = GenerateTokenOptions(signinCredentials, claims);
 
-        var refreshToken = GenerateRefreshToken();
-        _user.RefreshToken = refreshToken;
-        
-        if (request.PopulateExp)
-            _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+        User user = await _userManager.FindByIdAsync(request.Id);
 
-        await _userManager.UpdateAsync(_user);
+        if (request.PopulateExp)
+        {
+            user.RefreshToken = GenerateRefreshToken();
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        }
+
+        await _userManager.UpdateAsync(user);
         
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-
 
         return new CreateTokenResponse()
         {
             AccessToken = accessToken,
-            RefreshToken = refreshToken
+            RefreshToken = user.RefreshToken
         };
     }
 }

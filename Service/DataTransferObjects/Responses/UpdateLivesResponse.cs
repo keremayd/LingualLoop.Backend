@@ -1,7 +1,7 @@
 namespace Service.DataTransferObjects.Responses;
 
-public class ValidateUserResponse
+public class UpdateLivesResponse
 {
     public string UserId { get; set; }
-    public string UserNickname { get; set; }
+    public int Lives { get; set; }
 }

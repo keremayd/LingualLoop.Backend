@@ -22,4 +22,5 @@ public class LingualLoopContext : IdentityDbContext<User>
     public DbSet<User> Users { get; set; }
     public DbSet<UserScore> UserScores { get; set; }
     public DbSet<Video> Videos { get; set; }
+    public DbSet<UserLives> UserLives { get; set; }
 }

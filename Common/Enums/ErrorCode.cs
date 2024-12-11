@@ -45,4 +45,10 @@ public enum ErrorCode
     
     [Description("UserScores tablosunda kayıt bulunamadı. userid = {0}")]
     NoDataInUserScores = 4114,
+    
+    [Description("Kullanıcı UserLives tablosunda bulunamadı! userid = {0}")]
+    NoDataFoundInUserLives = 4115,
+    
+    [Description("Kullanıcının lives yeterli değil! lives = {0}")]
+    TheUserHasNoLives = 4116,
 }

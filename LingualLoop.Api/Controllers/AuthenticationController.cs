@@ -45,13 +45,14 @@ public class AuthenticationController : ControllerBase
     {
         var validateUserResponse = await _mediator.Send(new ValidateUserRequest() { UserName = request.UserName, Password = request.Password });
 
-        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { UserName = request.UserName, Password = request.Password, PopulateExp = true});
+        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { Id = validateUserResponse.UserId, Password = request.Password, PopulateExp = true});
 
         return Ok(new ApiResponse<AuthenticateResponse>()
         {
             Data = new AuthenticateResponse()
             {
                 UserId = validateUserResponse.UserId,
+                UserNickname = validateUserResponse.UserNickname,
                 AccessToken = createTokenResponse.AccessToken,
                 RefreshToken = createTokenResponse.RefreshToken
             }
@@ -63,7 +64,7 @@ public class AuthenticationController : ControllerBase
     {
         var refreshTokenResponse = await _mediator.Send(new RefreshTokenRequest() { AccessToken = tokenDto.AccessToken, RefreshToken = tokenDto.RefreshToken});
 
-        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { UserName = refreshTokenResponse.UserName, Password = refreshTokenResponse.PasswordHash, PopulateExp = false});
+        var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { Id = refreshTokenResponse.Id, Password = refreshTokenResponse.PasswordHash, PopulateExp = false});
 
         return Ok(new ApiResponse<CreateTokenResponse>()
         {
