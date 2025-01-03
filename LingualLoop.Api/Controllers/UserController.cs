@@ -44,7 +44,7 @@ public class UserController : ControllerBase
         });
     }
     
-    [HttpPost("updateScore")]
+    [HttpPost("update-score")]
     public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateScoreById([FromBody] UpdateScoreRequest request)
     {
         var updateScoreResponse = await _mediator.Send(new UpdateScoreRequest() { UserId = request.UserId, Point = request.Point});
@@ -70,6 +70,20 @@ public class UserController : ControllerBase
             {
                 UserId = updateScoreResponse.UserId,
                 Score = updateScoreResponse.Score,
+            }
+        });
+    }
+    
+    [HttpPost("update-lives")]
+    public async Task<ActionResult<ApiResponse<UpdateLivesResponse>>> UpdateLivesById([FromBody] UpdateLivesRequest request)
+    {
+        var updateLivesResponse = await _mediator.Send(new UpdateLivesRequest() { UserId = request.UserId });
+        
+        return Ok(new ApiResponse<UpdateScoreResponse>()
+        {
+            Data = new UpdateScoreResponse()
+            {
+                Lives = updateLivesResponse.Lives
             }
         });
     }
