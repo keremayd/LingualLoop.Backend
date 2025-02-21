@@ -23,6 +23,27 @@ public class VideoController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("random/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetQuestionByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] string userId)
+    {
+        var userLives = await _mediator.Send(new GetLivesByIdRequest() { UserId = userId });
+        if (userLives.Lives <= 0)
+        {
+            throw new LingualLoopException(ErrorCode.TheUserHasNoLives.CreateMessage(),
+                ErrorCode.TheUserHasNoLives.GetDescription(), HttpStatusCode.BadRequest);
+        }
+        
+        var userScoreResponse = await _mediator.Send(new GetScoreByIdRequest() { UserId = userId });
+
+        var response = await _mediator.Send(new GetQuestionByScoreRequest() { UserScore = userScoreResponse.Score, UserId = userScoreResponse.UserId });
+        
+        return Ok(new ApiResponse<GetQuestionByScoreResponse>()
+        {
+            Data = response
+        });
+    }
+    
+    [Authorize]
     [HttpGet("watched/{userId}")]
     public async Task<ActionResult<ApiResponse<GetWatchedVideosByUserResponse>>> GetWatchedVideosByUser([FromRoute] string userId)
     {

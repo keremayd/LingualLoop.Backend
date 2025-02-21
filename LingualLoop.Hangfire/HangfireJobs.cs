@@ -7,6 +7,6 @@ public class HangfireJobs
 {
     public static void ConfigureJobs()
     {
-        RecurringJob.AddOrUpdate<UpdateLivesSyncJob>(nameof(DenemeSyncJob), x => x.Execute(), "* * * * *");
+        RecurringJob.AddOrUpdate<UpdateLivesSyncJob>(nameof(UpdateLivesSyncJob), x => x.Execute(), "* * * * *");
     }
 }
