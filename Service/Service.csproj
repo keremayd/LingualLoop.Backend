@@ -18,4 +18,8 @@
         <ProjectReference Include="..\Postgres\Postgres.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DataTransferObjects\Requests\Video\" />
+    </ItemGroup>
+
 </Project>

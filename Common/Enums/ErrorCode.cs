@@ -63,4 +63,7 @@ public enum ErrorCode
     
     [Description("Kullanıcı UserBadge tablosunda bulunamadı! userid = {0}")]
     NoDataFoundInUserBadge = 4120,
+    
+    [Description("Kullanıcı UserVideo tablosunda bulunamadı! userid = {0}")]
+    NoDataFoundInUserVideo = 4121,
 }

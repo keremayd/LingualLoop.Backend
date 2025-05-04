@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Responses;
+using Service.DataTransferObjects.Responses.Video;
 using Service.Handlers.Commands;
 
 namespace LingualLoop.Api.Controllers;
@@ -20,6 +21,21 @@ public class VideoController : ControllerBase
     public VideoController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+    
+    /// <summary>
+    /// Belirtilen kullanıcının kayıt ettiği videoları getirir.
+    /// </summary>
+    [HttpGet("{userId}")]
+    public async Task<ActionResult<ApiResponse<List<GetVideosByIdResponse>>>> GetVideosById([FromRoute] string userId)
+    {
+        var response = await _mediator.Send(new GetVideosByIdRequest() { UserId = userId });
+        
+        //TODO response'taki fazlalıkları çıkart
+        return Ok(new ApiResponse<List<GetVideosByIdResponse>>
+        {
+            Data = response
+        });
     }
 
     [Authorize]

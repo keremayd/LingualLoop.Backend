@@ -41,7 +41,7 @@ public class GetQuestionByScoreQueryHandler : IRequestHandler<GetQuestionByScore
                 QuestionText = q.QuestionText,
                 MinScore = q.MinScore,
                 MaxScore = q.MaxScore,
-                Video = new Video
+                Video = new Postgres.Models.Video
                 {
                     VideoUrl = q.Video!.VideoUrl,
                     VideoDescription = q.Video.VideoDescription,
