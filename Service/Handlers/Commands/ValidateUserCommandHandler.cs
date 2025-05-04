@@ -47,7 +47,8 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
         return new ValidateUserResponse()
         {
             UserId = user.Id,
-            UserNickname = user.UserNickname
+            UserNickname = user.UserNickname,
+            UserName = user.UserName!
         };
     }
 }

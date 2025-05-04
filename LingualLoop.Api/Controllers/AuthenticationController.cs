@@ -53,6 +53,7 @@ public class AuthenticationController : ControllerBase
             {
                 UserId = validateUserResponse.UserId,
                 UserNickname = validateUserResponse.UserNickname,
+                UserName = validateUserResponse.UserName,
                 AccessToken = createTokenResponse.AccessToken,
                 RefreshToken = createTokenResponse.RefreshToken
             }

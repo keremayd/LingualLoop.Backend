@@ -54,4 +54,13 @@ public enum ErrorCode
     
     [Description("Kullanıcının puanına uygun soru Karty tablosunda bulunamadı! userscore = {0}")]
     NoDataFoundInKarty = 4117,
+    
+    [Description("Badge tablosunda rozet bulunamadı! badgeid = {0}")]
+    NoDataFoundInBadge = 4118,
+    
+    [Description("UserBadge tablosunda kayıt oluşturulamadı! badgeid = {0}, userid = {1}")]
+    NoDataCreatedInUserBadge = 4119,
+    
+    [Description("Kullanıcı UserBadge tablosunda bulunamadı! userid = {0}")]
+    NoDataFoundInUserBadge = 4120,
 }

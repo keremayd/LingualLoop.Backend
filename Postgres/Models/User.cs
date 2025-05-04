@@ -22,4 +22,7 @@ public class User : IdentityUser
     public UserScore UserScore { get; set; } = new UserScore();
 
     public ICollection<UserVideoHistory>? VideoHistory { get; set; }
+    
+    // One-to-Many: Bir kullanıcı birden fazla badge alabilir.
+    public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
 }
