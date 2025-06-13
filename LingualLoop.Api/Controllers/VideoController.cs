@@ -26,13 +26,13 @@ public class VideoController : ControllerBase
     /// <summary>
     /// Belirtilen kullanıcının kayıt ettiği videoları getirir.
     /// </summary>
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<ApiResponse<List<GetVideosByIdResponse>>>> GetVideosById([FromRoute] string userId)
+    [HttpGet("saved/{userId}")]
+    public async Task<ActionResult<ApiResponse<List<GetSavedVideosByIdResponse>>>> GetVideosById([FromRoute] string userId)
     {
-        var response = await _mediator.Send(new GetVideosByIdRequest() { UserId = userId });
+        var response = await _mediator.Send(new GetSavedVideosByIdRequest() { UserId = userId });
         
         //TODO response'taki fazlalıkları çıkart
-        return Ok(new ApiResponse<List<GetVideosByIdResponse>>
+        return Ok(new ApiResponse<List<GetSavedVideosByIdResponse>>
         {
             Data = response
         });

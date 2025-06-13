@@ -27,13 +27,6 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
 
     public async Task<ValidateUserResponse> Handle(ValidateUserRequest request, CancellationToken cancellationToken)
     {
-        User u = new User()
-        {
-            UserName = request.UserName,
-            PasswordHash = request.Password,
-            UserScore = {}
-        };
-        
         var user = await _userManager.FindByNameAsync(request.UserName);
         if (user == null)
             throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(),
@@ -46,9 +39,7 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
 
         return new ValidateUserResponse()
         {
-            UserId = user.Id,
-            UserNickname = user.UserNickname,
-            UserName = user.UserName!
+            User = user
         };
     }
 }

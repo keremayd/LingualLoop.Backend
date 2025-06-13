@@ -22,31 +22,40 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
         _userManager = userManager;
     }
 
-    private Dictionary<string, string> AddErrorInDictionary(IEnumerable<IdentityError> identityErrors)
+    private async Task CreateUserAsync(User user)
     {
-        var errorDictionary = new Dictionary<string, string>();
-
-        foreach (var error in identityErrors)
+        IdentityResult result;
+        List<ErrorList> errorList;
+        
+        // Şifresiz geldiyse db'ye şifre göndermiyoruz. Örn: Google ile giriş
+        if (string.IsNullOrEmpty(user.PasswordHash))
         {
-            switch (error.Code)
+            result = await _userManager.CreateAsync(user);
+            if (result.Succeeded)
+                return;
+            
+            errorList = result.Errors.Select(error => new ErrorList()
             {
-                case "DuplicateUserName":
-                    errorDictionary["Id"] = "Username is already taken.";
-                    break;
-                case "DuplicateEmail":
-                    errorDictionary["Email"] = "Email is already registered.";
-                    break;
-                case "DuplicateUserNickname":
-                    errorDictionary["UserNickname"] = "User nickname is already taken.";
-                    break;
+                ErrorCode = error.Code,
+                ErrorDescription = error.Description
+            }).ToList();
 
-                default:
-                    errorDictionary["General"] = error.Description;
-                    break;
-            }
+            throw new LingualLoopException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
+                ErrorCode.TheUserNotCreatedInDatabase.GetDescription(), HttpStatusCode.BadRequest);
         }
+        
+        result = await _userManager.CreateAsync(user, user.PasswordHash);
+        if (result.Succeeded)
+            return;
+        
+        errorList = result.Errors.Select(error => new ErrorList()
+        {
+            ErrorCode = error.Code,
+            ErrorDescription = error.Description
+        }).ToList();
 
-        return errorDictionary;
+        throw new LingualLoopException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
+            ErrorCode.TheUserNotCreatedInDatabase.GetDescription(), HttpStatusCode.BadRequest);
     }
 
     public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
@@ -56,7 +65,9 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
         {
             Email = request.Email,
             UserName = request.UserName,
-            UserNickname = request.UserNickname,
+            UserNickname = request.UserName,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             PasswordHash = request.Password,
             PhoneNumber = request.PhoneNumber,
             RefreshToken = refreshToken,
@@ -64,18 +75,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
             UserScore = {}
         };
         
-        var result = await _userManager.CreateAsync(u, request.Password);
-        if (!result.Succeeded)
-        {
-            var errorList = result.Errors.Select(error => new ErrorList()
-            {
-                ErrorCode = error.Code,
-                ErrorDescription = error.Description
-            }).ToList();
-
-            throw new LingualLoopException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(u.UserName), errorList,
-                ErrorCode.TheUserNotCreatedInDatabase.GetDescription(), HttpStatusCode.BadRequest);
-        }
+        await CreateUserAsync(u);
 
         await _userManager.AddToRolesAsync(u, request.Roles);
 

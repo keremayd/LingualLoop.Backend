@@ -1,6 +1,6 @@
 namespace Service.DataTransferObjects.Responses.Video;
 
-public class GetVideosByIdResponse
+public class GetSavedVideosByIdResponse
 {
     public int UserVideoId { get; set; }
     public string UserId { get; set; } = string.Empty;

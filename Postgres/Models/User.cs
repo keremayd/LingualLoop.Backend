@@ -14,6 +14,14 @@ public class User : IdentityUser
     [Column("user_nickname")]
     public string UserNickname { get; set; } = string.Empty;
     
+    [Column("firstname")]
+    public string? FirstName { get; set; } = string.Empty;
+    
+    [Column("lastname")]
+    public string? LastName { get; set; } = string.Empty;
+    
+    public string DisplayName => $"{FirstName} {LastName}";
+    
     public string RefreshToken { get; set; } = string.Empty;
     
     public DateTime RefreshTokenExpiryTime { get; set; }

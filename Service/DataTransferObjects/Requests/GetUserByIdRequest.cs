@@ -1,4 +1,5 @@
 using MediatR;
+using Postgres.Models;
 using Service.DataTransferObjects.Responses;
 
 namespace Service.DataTransferObjects.Requests;

@@ -10,16 +10,16 @@ using Service.DataTransferObjects.Responses.Video;
 
 namespace Service.Handlers.Queries.Video;
 
-public class GetVideosByIdQueryHandler : IRequestHandler<GetVideosByIdRequest, List<GetVideosByIdResponse>>
+public class GetSavedVideosByIdQueryHandler : IRequestHandler<GetSavedVideosByIdRequest, List<GetSavedVideosByIdResponse>>
 {
     private readonly ILingualLoopGenericRepository<UserVideo> _userVideoRepository;
 
-    public GetVideosByIdQueryHandler(ILingualLoopGenericRepository<UserVideo> userVideoRepository)
+    public GetSavedVideosByIdQueryHandler(ILingualLoopGenericRepository<UserVideo> userVideoRepository)
     {
         _userVideoRepository = userVideoRepository;
     }
 
-    public async Task<List<GetVideosByIdResponse>> Handle(GetVideosByIdRequest request, CancellationToken cancellationToken)
+    public async Task<List<GetSavedVideosByIdResponse>> Handle(GetSavedVideosByIdRequest request, CancellationToken cancellationToken)
     {
         var videoList = await _userVideoRepository.GetListAsync(u => u.UserId == request.UserId,
             video => new UserVideo()
@@ -36,7 +36,7 @@ public class GetVideosByIdQueryHandler : IRequestHandler<GetVideosByIdRequest, L
             throw new LingualLoopException(ErrorCode.NoDataFoundInUserVideo.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInUserVideo.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
-        return videoList.Select(b => new GetVideosByIdResponse
+        return videoList.Select(b => new GetSavedVideosByIdResponse
         {
             UserVideoId = b.UserVideoId,
             UserId = b.UserId,
