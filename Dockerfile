@@ -1,18 +1,26 @@
-# sdk image ile build yapıyoruz
+# Build aşaması
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /app
 
-# csproj ve solution kopyala ve restore yap
-COPY *.csproj ./
+# Solution dosyasını ve projeleri kopyala
+COPY LingualLoop.Api.sln ./
+COPY LingualLoop.Api/*.csproj ./LingualLoop.Api/
+COPY LingualLoop.Hangfire/*.csproj ./LingualLoop.Hangfire/
+
+# Restore işlemi (tüm solution için)
 RUN dotnet restore
 
-# Tüm dosyaları kopyala ve publish et
+# Projeleri kopyala (kodlar ve diğer dosyalar)
 COPY . .
-RUN dotnet publish -c Release -o out
 
-# runtime image
+# Publish işlemi - API projesi için
+RUN dotnet publish LingualLoop.Api/LingualLoop.Api.csproj -c Release -o out
+
+# Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
+
+# Build aşamasından derlenen dosyaları kopyala
 COPY --from=build /app/out ./
 
 EXPOSE 80
