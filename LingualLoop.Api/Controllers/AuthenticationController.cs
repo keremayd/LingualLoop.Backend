@@ -30,7 +30,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<ApiResponse<RegisterUserResponse>>> RegisterUser([FromBody] RegisterUserRequest request)
+    public async Task<ActionResult<ApiResponse<RegisterUserResponse>>> RegisterUser([FromBody] RegisterUserRequest request, [FromForm] IFormFile file)
     {
         if (string.IsNullOrEmpty(request.UserNickname))
         {
@@ -39,10 +39,23 @@ public class AuthenticationController : ControllerBase
         }
 
         var response = await _mediator.Send(request);
+        
+        var extension = Path.GetExtension(file.FileName);
+        var key = $"profile-photos/{response.User!.Id}/profile{extension}";
+
+        await _amazonService.UploadFileAsync(key, file.OpenReadStream(), file.ContentType);
+        
+        await _mediator.Send(new UploadPhotoByIdRequest() { Id = response.User!.Id, PhotoUrl = key });
+
+        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key);
 
         return Ok(new ApiResponse<RegisterUserResponse>()
         {
-            Data = response,
+            Data = new RegisterUserResponse()
+            {
+                User = response.User,
+                SignedUrl = photoSignedUrl
+            },
             Message = "User başarıyla oluşturuldu."
         });
     }
