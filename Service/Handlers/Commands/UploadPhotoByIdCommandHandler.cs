@@ -22,6 +22,7 @@ public class UploadPhotoByIdCommandHandler : IRequestHandler<UploadPhotoByIdRequ
         user!.ProfilePhoto = request.PhotoUrl;
         
         _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync(cancellationToken);
 
         return new UploadPhotoByIdResponse()
         {
