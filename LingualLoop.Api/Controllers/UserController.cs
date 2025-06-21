@@ -1,4 +1,5 @@
 using System.Net;
+using AwsService.Abstractions;
 using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
@@ -17,10 +18,12 @@ namespace LingualLoop.Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IAwsService _amazonService;
 
-    public UserController(IMediator mediator)
+    public UserController(IMediator mediator, IAwsService amazonService)
     {
         _mediator = mediator;
+        _amazonService = amazonService;
     }
 
     [HttpGet]
@@ -104,6 +107,35 @@ public class UserController : ControllerBase
                 Score = getScoreByIdResponse.Score,
                 Lives = getLivesByIdResponse.Lives
             }
+        });
+    }
+    
+    [HttpPost("{id}/upload-profile-photo")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<UploadUserFileResponse>>> UploadUserFile([FromRoute] string id, [FromForm] IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ApiResponse<string> { Message = "Dosya boş." });
+
+        var user = await _mediator.Send(new GetUserByIdRequest() { UserId = id });
+
+        var extension = Path.GetExtension(file.FileName);
+        var key = $"profile-photos/{id}/profile{extension}";
+
+        await _amazonService.UploadFileAsync(key, file.OpenReadStream(), file.ContentType);
+
+        await _mediator.Send(new UploadPhotoByIdRequest() { Id = user.UserId, PhotoUrl = key });
+
+        var fileUrl = _amazonService.GeneratePreSignedUrl(key);
+        
+        return Ok(new ApiResponse<UploadUserFileResponse> 
+        { 
+            Data = new UploadUserFileResponse()
+            {
+                Id = user.UserId,
+                ProfilePhoto = key,
+                SignedUrl = fileUrl
+            } 
         });
     }
 }

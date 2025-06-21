@@ -1,3 +1,4 @@
+using AwsService.Extensions;
 using LingualLoop.Api.Middlewares;
 using Postgres.Extensions;
 using Service.Extensions;
@@ -8,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddIdentity();
 builder.Services.AddJwt(builder.Configuration);
-builder.Services.AddPostgres(builder.Configuration);
+builder.Services
+    .AddPostgres(builder.Configuration)
+    .AddAwsS3Service(builder.Configuration);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",

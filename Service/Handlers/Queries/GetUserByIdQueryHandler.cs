@@ -38,6 +38,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdRequest, GetUs
         {
             UserId = user.Id,
             UserNickname = user.UserNickname,
+            ProfilePhoto = user.ProfilePhoto,
             UserScore = user.UserScore
         };
     }

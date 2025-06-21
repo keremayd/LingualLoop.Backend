@@ -22,6 +22,9 @@ public class User : IdentityUser
     
     public string DisplayName => $"{FirstName} {LastName}";
     
+    [Column("profilephoto")]
+    public string? ProfilePhoto { get; set; } = string.Empty;
+    
     public string RefreshToken { get; set; } = string.Empty;
     
     public DateTime RefreshTokenExpiryTime { get; set; }
