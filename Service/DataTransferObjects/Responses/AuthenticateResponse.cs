@@ -6,6 +6,7 @@ public class AuthenticateResponse
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
+    public string ProfilePhotoUrl { get; set; } = string.Empty;
     public string UserNickname { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string AccessToken { get; set; } = string.Empty;

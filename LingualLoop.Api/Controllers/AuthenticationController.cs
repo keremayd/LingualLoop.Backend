@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using AwsService.Abstractions;
 using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
@@ -20,10 +21,12 @@ namespace LingualLoop.Api.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IAwsService _amazonService;
 
-    public AuthenticationController(IMediator mediator)
+    public AuthenticationController(IMediator mediator, IAwsService amazonService)
     {
         _mediator = mediator;
+        _amazonService = amazonService;
     }
 
     [HttpPost("register")]
@@ -51,6 +54,8 @@ public class AuthenticationController : ControllerBase
 
         var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { Id = validateUserResponse.User.Id, Password = request.Password, PopulateExp = true});
 
+        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(validateUserResponse.User.ProfilePhoto!);
+        
         return Ok(new ApiResponse<AuthenticateResponse>()
         {
             Data = new AuthenticateResponse()
@@ -59,6 +64,7 @@ public class AuthenticationController : ControllerBase
                 FirstName = validateUserResponse.User.FirstName!,
                 LastName = validateUserResponse.User.LastName!,
                 DisplayName = validateUserResponse.User.DisplayName,
+                ProfilePhotoUrl = photoSignedUrl,
                 UserNickname = validateUserResponse.User.UserNickname,
                 UserName = validateUserResponse.User.UserName!,
                 AccessToken = createTokenResponse.AccessToken,
