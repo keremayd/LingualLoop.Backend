@@ -30,15 +30,29 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<ApiResponse<RegisterUserResponse>>> RegisterUser([FromBody] RegisterUserRequest request, [FromForm] IFormFile file)
+    public async Task<ActionResult<ApiResponse<RegisterUserResponse>>> RegisterUser([FromForm] RegisterUserWithPhotoRequest  request)
     {
         if (string.IsNullOrEmpty(request.UserNickname))
         {
             throw new LingualLoopException(ErrorCode.UserNicknameCannotBeNullOrEmpty.CreateMessage(),
                 ErrorCode.UserNicknameCannotBeNullOrEmpty.GetDescription(), HttpStatusCode.BadRequest);
         }
+        
+        var file = request.File;
 
-        var response = await _mediator.Send(request);
+        var registerUserRequest = new RegisterUserRequest()
+        {
+            UserNickname = request.UserNickname,
+            UserName= request.UserName,
+            FirstName = request.FirstName,
+            LastName  = request.LastName,
+            Password  =  request.Password,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
+            Roles = request.Roles,
+        };
+        
+        var response = await _mediator.Send(registerUserRequest);
         
         var extension = Path.GetExtension(file.FileName);
         var key = $"profile-photos/{response.User!.Id}/profile{extension}";
