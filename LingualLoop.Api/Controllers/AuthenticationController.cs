@@ -5,6 +5,7 @@ using AwsService.Abstractions;
 using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
+using Common.Helper;
 using Google.Apis.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Cors;
@@ -103,6 +104,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("google-login")]
     public async Task<ActionResult<ApiResponse<AuthenticateResponse>>> GoogleLogin([FromBody] ValidateUserByEmailRequest request)
     {
+        string photoSignedUrl = string.Empty;
         // 1. Google Token'ı doğrula
         var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
 
@@ -116,6 +118,15 @@ public class AuthenticationController : ControllerBase
             
             var registeredUser = await _mediator.Send(new RegisterUserRequest() { Email = payload.Email, UserName = slug, FirstName = payload.GivenName, LastName = payload.FamilyName, UserNickname = slug , Roles = new List<string>(){"User"}});
             
+            // 2.3 Profil fotoğrafını google'dan aldık
+            var stream = await ImageHelper.DownloadImageFromUrlAsync(payload.Picture);
+            var key = $"profile-photos/{registeredUser.User!.Id}/profile.png";
+
+            await _amazonService.UploadFileAsync(key, stream, "image/png");
+            
+            await _mediator.Send(new UploadPhotoByIdRequest() { Id = registeredUser.User.Id, PhotoUrl = key });
+            
+            photoSignedUrl = _amazonService.GeneratePreSignedUrl(key);
             getUserByEmailResponse.User = registeredUser.User;
         }
 
@@ -135,6 +146,7 @@ public class AuthenticationController : ControllerBase
                 FirstName = getUserByEmailResponse.User.FirstName!,
                 LastName = getUserByEmailResponse.User.LastName!,
                 DisplayName = getUserByEmailResponse.User.DisplayName,
+                ProfilePhotoUrl = photoSignedUrl,
                 UserName = getUserByEmailResponse.User.UserName!,
                 UserNickname = getUserByEmailResponse.User.UserNickname,
                 AccessToken = createTokenResponse.AccessToken,
