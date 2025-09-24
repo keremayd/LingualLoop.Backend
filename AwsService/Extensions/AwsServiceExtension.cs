@@ -22,6 +22,7 @@ public static class AwsServiceExtension
         ));
 
         services.AddScoped<IAwsService, Services.AwsService>();
+        services.AddScoped<IAwsBucketNameFactory, AwsBucketNameFactory>();
         
         return services;
     }

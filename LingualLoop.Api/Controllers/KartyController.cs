@@ -1,4 +1,5 @@
 using System.Net;
+using AwsService.Abstractions;
 using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
@@ -17,10 +18,12 @@ namespace LingualLoop.Api.Controllers;
 public class KartyController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IAwsService _amazonService;
 
-    public KartyController(IMediator mediator)
+    public KartyController(IMediator mediator, IAwsService amazonService)
     {
         _mediator = mediator;
+        _amazonService = amazonService;
     }
 
     [Authorize]
@@ -31,9 +34,19 @@ public class KartyController : ControllerBase
 
         var kartyQuestion = await _mediator.Send(new GetKartyByScoreRequest() { UserScore = userScoreResponse.Score, UserId = userScoreResponse.UserId });
         
+        var signedUrl = _amazonService.GeneratePreSignedUrl(kartyQuestion.KartyUrl, BucketType.KartyAssets);
+        
         return Ok(new ApiResponse<GetKartyByScoreResponse>()
         {
-            Data = kartyQuestion
+            Data = new GetKartyByScoreResponse()
+            {
+                KartyId = kartyQuestion.KartyId,
+                QuestionText = kartyQuestion.QuestionText,
+                KartyUrl = signedUrl,
+                IsCorrect = kartyQuestion.IsCorrect,
+                MinScore = kartyQuestion.MinScore,
+                MaxScore = kartyQuestion.MaxScore
+            }
         });
     }
 }

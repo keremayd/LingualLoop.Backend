@@ -62,7 +62,7 @@ public class AuthenticationController : ControllerBase
         
         await _mediator.Send(new UploadPhotoByIdRequest() { Id = response.User!.Id, PhotoUrl = key });
 
-        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key);
+        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
 
         return Ok(new ApiResponse<RegisterUserResponse>()
         {
@@ -82,7 +82,7 @@ public class AuthenticationController : ControllerBase
 
         var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { Id = validateUserResponse.User.Id, Password = request.Password, PopulateExp = true});
 
-        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(validateUserResponse.User.ProfilePhoto!);
+        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(validateUserResponse.User.ProfilePhoto!, BucketType.ProfilePhotos);
         
         return Ok(new ApiResponse<AuthenticateResponse>()
         {
@@ -95,6 +95,7 @@ public class AuthenticationController : ControllerBase
                 ProfilePhotoUrl = photoSignedUrl,
                 UserNickname = validateUserResponse.User.UserNickname,
                 UserName = validateUserResponse.User.UserName!,
+                UserRank = validateUserResponse.User.UserRank,
                 AccessToken = createTokenResponse.AccessToken,
                 RefreshToken = createTokenResponse.RefreshToken
             }
@@ -126,7 +127,7 @@ public class AuthenticationController : ControllerBase
             
             await _mediator.Send(new UploadPhotoByIdRequest() { Id = registeredUser.User.Id, PhotoUrl = key });
             
-            photoSignedUrl = _amazonService.GeneratePreSignedUrl(key);
+            photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
             getUserByEmailResponse.User = registeredUser.User;
         }
 

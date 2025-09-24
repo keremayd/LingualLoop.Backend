@@ -32,6 +32,8 @@ public class User : IdentityUser
     // One-to-Many: One User can have many UserScore
     public UserScore UserScore { get; set; } = new UserScore();
 
+    public int UserRank;
+        
     public ICollection<UserVideoHistory>? VideoHistory { get; set; }
     
     // One-to-Many: Bir kullanıcı birden fazla badge alabilir.

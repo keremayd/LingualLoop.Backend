@@ -4,6 +4,7 @@ using Amazon.S3.Transfer;
 using AwsService.Abstractions;
 using AwsService.Options;
 using Microsoft.Extensions.Options;
+using BucketType = Common.Enums.BucketType;
 
 namespace AwsService.Services;
 
@@ -11,11 +12,13 @@ public class AwsService : IAwsService
 {
     private readonly AwsOptions _options;
     private readonly IAmazonS3 _amazonClient;
+    private readonly IAwsBucketNameFactory _bucketFactory;
 
-    public AwsService(IOptions<AwsOptions> options, IAmazonS3 amazonClient)
+    public AwsService(IOptions<AwsOptions> options, IAmazonS3 amazonClient, IAwsBucketNameFactory bucketFactory)
     {
         _options = options.Value;
         _amazonClient = amazonClient;
+        _bucketFactory = bucketFactory;
     }
     
     public async Task UploadFileAsync(string key, Stream fileStream, string contentType)
@@ -24,7 +27,7 @@ public class AwsService : IAwsService
         {
             InputStream = fileStream,
             Key = key,
-            BucketName = _options.BucketName,
+            BucketName = _options.Buckets["ProfilePhotos"],
             ContentType = contentType
         };
 
@@ -32,11 +35,11 @@ public class AwsService : IAwsService
         await transferUtility.UploadAsync(uploadRequest);
     }
     
-    public string GeneratePreSignedUrl(string key, int expireMinutes = 15)
+    public string GeneratePreSignedUrl(string key, BucketType bucketType, int expireMinutes = 15)
     {
         var request = new GetPreSignedUrlRequest
         {
-            BucketName = _options.BucketName,
+            BucketName = _bucketFactory.GetBucketName(bucketType),
             Key = key,
             Expires = DateTime.UtcNow.AddMinutes(expireMinutes)
         };

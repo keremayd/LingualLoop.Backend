@@ -126,7 +126,7 @@ public class UserController : ControllerBase
 
         await _mediator.Send(new UploadPhotoByIdRequest() { Id = user.UserId, PhotoUrl = key });
 
-        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key);
+        var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
         
         return Ok(new ApiResponse<UploadUserFileResponse> 
         { 
