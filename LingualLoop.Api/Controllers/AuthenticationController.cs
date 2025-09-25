@@ -80,6 +80,8 @@ public class AuthenticationController : ControllerBase
     {
         var validateUserResponse = await _mediator.Send(new ValidateUserRequest() { UserName = request.UserName, Password = request.Password });
 
+        var userRank = await _mediator.Send(new GetRankByUserIdRequest() { UserId = validateUserResponse.User.Id });
+        
         var createTokenResponse = await _mediator.Send(new CreateTokenRequest() { Id = validateUserResponse.User.Id, Password = request.Password, PopulateExp = true});
 
         var photoSignedUrl = _amazonService.GeneratePreSignedUrl(validateUserResponse.User.ProfilePhoto!, BucketType.ProfilePhotos);
@@ -95,7 +97,7 @@ public class AuthenticationController : ControllerBase
                 ProfilePhotoUrl = photoSignedUrl,
                 UserNickname = validateUserResponse.User.UserNickname,
                 UserName = validateUserResponse.User.UserName!,
-                UserRank = validateUserResponse.User.UserRank,
+                UserRank = userRank,
                 AccessToken = createTokenResponse.AccessToken,
                 RefreshToken = createTokenResponse.RefreshToken
             }
@@ -127,11 +129,15 @@ public class AuthenticationController : ControllerBase
             
             await _mediator.Send(new UploadPhotoByIdRequest() { Id = registeredUser.User.Id, PhotoUrl = key });
             
-            photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
             getUserByEmailResponse.User = registeredUser.User;
         }
 
-        // 3. Token üret
+        photoSignedUrl = _amazonService.GeneratePreSignedUrl(getUserByEmailResponse.User.ProfilePhoto, BucketType.ProfilePhotos);
+
+        // 3. Rank bilgisini al
+        var userRank = await _mediator.Send(new GetRankByUserIdRequest() { UserId = getUserByEmailResponse.User.Id });
+
+        // 4. Token üret
         var createTokenResponse = await _mediator.Send(new CreateTokenRequest
         {
             Id = getUserByEmailResponse.User!.Id,
@@ -150,6 +156,7 @@ public class AuthenticationController : ControllerBase
                 ProfilePhotoUrl = photoSignedUrl,
                 UserName = getUserByEmailResponse.User.UserName!,
                 UserNickname = getUserByEmailResponse.User.UserNickname,
+                UserRank = userRank,
                 AccessToken = createTokenResponse.AccessToken,
                 RefreshToken = createTokenResponse.RefreshToken
             }

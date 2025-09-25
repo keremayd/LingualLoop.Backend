@@ -37,18 +37,6 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
         if (!response)
             throw new LingualLoopException(ErrorCode.TheUserAuthenticatedFailed.CreateMessage(),
                 ErrorCode.TheUserAuthenticatedFailed.GetDescription(), HttpStatusCode.Unauthorized);
-
-        //TODO: UserScore Command'ı oluşturmak gerekir. Aşağıdaki işlemleri oraya aktar.
-        
-        var userScore = await _context.UserScores
-            .Where(us => us.UserId == user.Id)
-            .Select(us => us.Score)
-            .FirstOrDefaultAsync(cancellationToken);
-        
-        var rank = await _context.UserScores
-            .CountAsync(us => us.Score > userScore, cancellationToken);
-
-        user.UserRank = rank + 1;
         
         return new ValidateUserResponse()
         {
