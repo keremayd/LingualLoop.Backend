@@ -33,18 +33,14 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<ApiResponse<RegisterUserResponse>>> RegisterUser([FromForm] RegisterUserWithPhotoRequest  request)
     {
-        if (string.IsNullOrEmpty(request.UserNickname))
-        {
-            throw new LingualLoopException(ErrorCode.UserNicknameCannotBeNullOrEmpty.CreateMessage(),
-                ErrorCode.UserNicknameCannotBeNullOrEmpty.GetDescription(), HttpStatusCode.BadRequest);
-        }
-        
         var file = request.File;
+        var name = request.FirstName + request.LastName;
+        var slug = name.ToSluggedUsername(); 
 
         var registerUserRequest = new RegisterUserRequest()
         {
-            UserNickname = request.UserNickname,
-            UserName= request.UserName,
+            UserNickname = slug,
+            UserName= slug,
             FirstName = request.FirstName,
             LastName  = request.LastName,
             Password  =  request.Password,
@@ -64,13 +60,15 @@ public class AuthenticationController : ControllerBase
 
         var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
 
-        return Ok(new ApiResponse<RegisterUserResponse>()
-        {
-            Data = new RegisterUserResponse()
+        var a = new RegisterUserResponse()
             {
                 User = response.User,
                 SignedUrl = photoSignedUrl
-            },
+            };
+
+        return Ok(new ApiResponse<RegisterUserResponse>()
+        {
+            Data = a,
             Message = "User başarıyla oluşturuldu."
         });
     }
@@ -78,7 +76,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<AuthenticateResponse>>> Authenticate([FromBody] ValidateUserRequest request)
     {
-        var validateUserResponse = await _mediator.Send(new ValidateUserRequest() { UserName = request.UserName, Password = request.Password });
+        var validateUserResponse = await _mediator.Send(new ValidateUserRequest() { Email = request.Email, Password = request.Password });
 
         var userRank = await _mediator.Send(new GetRankByUserIdRequest() { UserId = validateUserResponse.User.Id });
         

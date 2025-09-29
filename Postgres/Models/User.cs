@@ -10,6 +10,7 @@ public class User : IdentityUser
     // [Key]
     // [Column("user_id")]
     // public int UserId { get; set; }
+    public string UserId => Id;
 
     [Column("user_nickname")]
     public string UserNickname { get; set; } = string.Empty;

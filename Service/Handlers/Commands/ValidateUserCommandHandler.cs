@@ -28,7 +28,7 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
 
     public async Task<ValidateUserResponse> Handle(ValidateUserRequest request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByNameAsync(request.UserName);
+        var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
             throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(),
                 ErrorCode.NoDataInUsers.GetDescription(), HttpStatusCode.Unauthorized);
