@@ -60,15 +60,13 @@ public class AuthenticationController : ControllerBase
 
         var photoSignedUrl = _amazonService.GeneratePreSignedUrl(key, BucketType.ProfilePhotos);
 
-        var a = new RegisterUserResponse()
+        return Ok(new ApiResponse<RegisterUserResponse>()
+        {
+            Data = new RegisterUserResponse()
             {
                 User = response.User,
                 SignedUrl = photoSignedUrl
-            };
-
-        return Ok(new ApiResponse<RegisterUserResponse>()
-        {
-            Data = a,
+            },
             Message = "User başarıyla oluşturuldu."
         });
     }
