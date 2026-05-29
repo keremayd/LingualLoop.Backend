@@ -42,6 +42,7 @@ public class KartyController : ControllerBase
             {
                 KartyId = kartyQuestion.KartyId,
                 QuestionText = kartyQuestion.QuestionText,
+                CorrectText = kartyQuestion.CorrectText,
                 KartyUrl = signedUrl,
                 IsCorrect = kartyQuestion.IsCorrect,
                 MinScore = kartyQuestion.MinScore,

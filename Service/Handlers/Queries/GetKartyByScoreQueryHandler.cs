@@ -39,6 +39,7 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
             {
                 KartyId = q.KartyId,
                 QuestionText = q.QuestionText,
+                CorrectText = q.CorrectText,
                 KartyUrl = q.KartyUrl,
                 MinScore = q.MinScore,
                 MaxScore = q.MaxScore,

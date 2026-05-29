@@ -13,6 +13,9 @@ public class Karty
     [Column("question_text")]
     public string QuestionText { get; set; } = string.Empty;
     
+    [Column("correct_text")]
+    public string CorrectText { get; set; } = string.Empty;
+    
     [Column("karty_url")]
     public string KartyUrl { get; set; } = string.Empty;
     
