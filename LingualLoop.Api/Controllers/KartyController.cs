@@ -50,4 +50,51 @@ public class KartyController : ControllerBase
             }
         });
     }
+
+    [Authorize]
+    [HttpGet("wrong/random/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomWrongKartyByUserId([FromRoute] string userId)
+    {
+        var kartyQuestion = await _mediator.Send(new GetWrongKartyReviewRequest { UserId = userId });
+
+        var signedUrl = _amazonService.GeneratePreSignedUrl(kartyQuestion.KartyUrl, BucketType.KartyAssets);
+
+        return Ok(new ApiResponse<GetKartyByScoreResponse>()
+        {
+            Data = new GetKartyByScoreResponse()
+            {
+                KartyId = kartyQuestion.KartyId,
+                QuestionText = kartyQuestion.QuestionText,
+                CorrectText = kartyQuestion.CorrectText,
+                KartyUrl = signedUrl,
+                IsCorrect = kartyQuestion.IsCorrect,
+                MinScore = kartyQuestion.MinScore,
+                MaxScore = kartyQuestion.MaxScore
+            }
+        });
+    }
+
+    [Authorize]
+    [HttpPost("wrong")]
+    public async Task<ActionResult<ApiResponse<RecordWrongKartyResponse>>> RecordWrongKarty([FromBody] RecordWrongKartyRequest request)
+    {
+        var response = await _mediator.Send(request);
+
+        return Ok(new ApiResponse<RecordWrongKartyResponse>()
+        {
+            Data = response
+        });
+    }
+
+    [Authorize]
+    [HttpPost("wrong/review")]
+    public async Task<ActionResult<ApiResponse<ResolveWrongKartyReviewResponse>>> ResolveWrongKartyReview([FromBody] ResolveWrongKartyReviewRequest request)
+    {
+        var response = await _mediator.Send(request);
+
+        return Ok(new ApiResponse<ResolveWrongKartyReviewResponse>()
+        {
+            Data = response
+        });
+    }
 }

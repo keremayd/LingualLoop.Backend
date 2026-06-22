@@ -36,7 +36,26 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            LingualLoopException lingualLoopException = (edInfo.SourceException as LingualLoopException)!;
+            LingualLoopException? lingualLoopException = edInfo.SourceException as LingualLoopException;
+            if (lingualLoopException is null)
+            {
+                _logger.LogError(exception, "Unhandled exception");
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 500;
+
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(new Dictionary<string, object?>
+                {
+                    ["data"] = null,
+                    ["code"] = "500",
+                    ["errorCode"] = "UnhandledException",
+                    ["message"] = exception.Message,
+                    ["detailedMessage"] = exception.InnerException?.Message,
+                }));
+
+                return;
+            }
+
             var errorList = new
             {
                 errorCode = lingualLoopException.ErrorList?.Select(x => x.ErrorCode).ToList(),

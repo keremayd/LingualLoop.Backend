@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
+using Service.DataTransferObjects.Requests.Karty;
 using Service.DataTransferObjects.Responses;
 using Service.Handlers.Commands;
 
@@ -50,10 +51,24 @@ public class UserController : ControllerBase
     [HttpPost("update-score")]
     public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateScoreById([FromBody] UpdateScoreRequest request)
     {
-        var updateScoreResponse = await _mediator.Send(new UpdateScoreRequest() { UserId = request.UserId, Point = request.Point});
+        var updateScoreResponse = await _mediator.Send(new UpdateScoreRequest()
+        {
+            UserId = request.UserId,
+            Point = request.Point,
+            KartyId = request.KartyId
+        });
 
         if (request.Point == -1)
         {
+            if (request.KartyId.HasValue)
+            {
+                await _mediator.Send(new RecordWrongKartyRequest()
+                {
+                    UserId = request.UserId,
+                    KartyId = request.KartyId.Value
+                });
+            }
+
             var updateLivesResponse = await _mediator.Send(new UpdateLivesRequest() { UserId = request.UserId });
             
             return Ok(new ApiResponse<UpdateScoreResponse>()

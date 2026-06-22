@@ -17,10 +17,17 @@ public class UserKartyHistory
     [ForeignKey("Karty")]
     [Column("karty_id")]
     public int KartyId { get; set; }
+
+    [Column("wrong_count")]
+    public int WrongCount { get; set; }
+
+    [Column("last_wrong_date")]
+    public DateTime LastWrongDate { get; set; }
+
+    [Column("reviewed_date")]
+    public DateTime? ReviewedDate { get; set; }
     
-    // One-to-Many: Her izleme kaydı bir kullanıcıya ait.
     public User? User { get; set; }
 
-    // One-to-Many: Her izleme kaydı bir videoya ait.
     public Karty? Karty { get; set; }
 }
