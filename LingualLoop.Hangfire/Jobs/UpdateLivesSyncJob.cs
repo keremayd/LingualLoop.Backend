@@ -1,29 +1,32 @@
 using Postgres.Abstractions;
+using Postgres;
 using Postgres.Models;
+using Service.Helpers;
 
 namespace LingualLoop.Hangfire.Jobs;
 
+/// <summary>
+/// Bilet yenileme işi: zamanı gelmiş ve tavanın altındaki her kullanıcıya
+/// bir bilet ekler. Yenilenme aralığı ve tavan LivesRules'tan okunur, burada
+/// ayrı sabit tutulmaz.
+/// </summary>
 public class UpdateLivesSyncJob
 {
-    private readonly ILingualLoopGenericRepository<UserLives> _userLivesRepository;
+    private readonly LingualLoopContext _context;
 
     public UpdateLivesSyncJob(ILingualLoopGenericRepository<UserLives> userLivesRepository)
     {
-        _userLivesRepository = userLivesRepository;
+        _context = userLivesRepository.GetDbContext();
     }
 
     public async Task Execute()
     {
-        var userList = await _userLivesRepository.GetListAsync(u => u.LastLivesResetTime <= DateTime.UtcNow && u.Lives < u.MaxLives,
-                user => new UserLives(){UserLivesId = user.UserLivesId, UserId = user.UserId, Lives = user.Lives, MaxLives = user.MaxLives, LastLivesResetTime = user.LastLivesResetTime});
-
-        foreach (var user in userList)
-        {
-            user.Lives += 1;
-            user.LastLivesResetTime = DateTime.UtcNow.AddMinutes(5);
-            
-            _userLivesRepository.Update(user);
-            await _userLivesRepository.SaveChangesAsync(CancellationToken.None);
-        }
+        // Aynı atomik hesap kullanıcı sorgusunda da çalışır. İş gecikmişse
+        // geçmiş bütün iki saatlik aralıklar tek turda, tavana kadar telafi
+        // edilir; kullanıcı sorgusuyla yarışırsa çift bilet oluşmaz.
+        await LivesRegeneration.MaterializeAllDueAsync(
+            _context,
+            DateTime.UtcNow,
+            CancellationToken.None);
     }
 }

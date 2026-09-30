@@ -25,29 +25,41 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
     public async Task<GetKartyByScoreResponse> Handle(GetWrongKartyReviewRequest request, CancellationToken cancellationToken)
     {
         await UserKartyHistorySchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
-        var kartyQuestion = await _context.UserKartyHistories
+        var karty = await _context.UserKartyHistories
             .Where(history => history.UserId == request.UserId && history.ReviewedDate == null)
             .OrderByDescending(history => history.WrongCount)
             .ThenBy(history => EF.Functions.Random())
-            .Select(history => new GetKartyByScoreResponse
+            .Select(history => new
             {
                 KartyId = history.Karty!.KartyId,
-                QuestionText = history.Karty.QuestionText,
-                CorrectText = history.Karty.CorrectText,
+                history.Karty.NounText,
+                history.Karty.Article,
                 KartyUrl = history.Karty.KartyUrl,
                 MinScore = history.Karty.MinScore,
                 MaxScore = history.Karty.MaxScore,
-                IsCorrect = history.Karty.IsCorrect,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (kartyQuestion is null)
+        if (karty is null)
         {
             throw new LingualLoopException(ErrorCode.NoDataFoundInKarty.CreateMessage(0),
                 ErrorCode.NoDataFoundInKarty.GetDescription(0), HttpStatusCode.BadRequest);
         }
 
-        return kartyQuestion;
+        var challenge = KartySpellingChallengeBuilder.Build(karty.NounText);
+
+        return new GetKartyByScoreResponse
+        {
+            KartyId = karty.KartyId,
+            QuestionText = challenge.DisplayText,
+            CorrectText = challenge.CorrectText,
+            Article = karty.Article,
+            KartyUrl = karty.KartyUrl,
+            MinScore = karty.MinScore,
+            MaxScore = karty.MaxScore,
+            IsCorrect = challenge.IsCorrect,
+        };
     }
 }

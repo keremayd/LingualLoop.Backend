@@ -16,16 +16,25 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\AwsService\AwsService.csproj" />
       <ProjectReference Include="..\Common\Common.csproj" />
       <ProjectReference Include="..\Postgres\Postgres.csproj" />
       <ProjectReference Include="..\Service\Service.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="appsettings.json">
+      <!-- Include (Update değil): düz Microsoft.NET.Sdk, appsettings.json'ı
+           kendiliğinden Content olarak eklemez; Update hiçbir öğeyle
+           eşleşmediği için dosya çıktıya kopyalanmıyor ve yapılandırma
+           boş kalıyordu. -->
+      <Content Include="appsettings.json">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="appsettings.Local.json" Condition="Exists('appsettings.Local.json')">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       </Content>
     </ItemGroup>
 

@@ -10,8 +10,25 @@ public class UserScore
     [Column("user_score_id")]
     public int UserScoreId { get; set; }
 
+    /// <summary>
+    /// Zorluk termostatı. Doğru cevapta artar, yanlış cevapta azalır;
+    /// `GetKartyByScore` hangi zorluk bandından kart geleceğini buna göre
+    /// seçer. Kullanıcıya ham hâliyle gösterilmez — düşmesi bir kayıp değil,
+    /// kalibrasyondur.
+    /// </summary>
     [Column("score")]
     public int Score { get; set; }
+
+    /// <summary>
+    /// İlerleme sayacı. Yalnızca doğru cevapta artar, yanlışta hiç değişmez.
+    /// Kullanıcıya gösterilen sayı budur: kazanılan bir şey geri alınmaz.
+    ///
+    /// Skor tek başınayken iki işi birden yapıyordu — zorluk seçmek için
+    /// düşmesi, ilerlemeyi göstermek için düşmemesi gerekiyordu. İkisi
+    /// ayrıldı.
+    /// </summary>
+    [Column("experience")]
+    public int Experience { get; set; }
 
     // Foreign Keys
     [ForeignKey("UserId")]

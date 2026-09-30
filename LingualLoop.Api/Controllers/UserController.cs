@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Requests.Karty;
+using Service.DataTransferObjects.Requests.Profile;
 using Service.DataTransferObjects.Responses;
+using Service.DataTransferObjects.Responses.Profile;
 using Service.Handlers.Commands;
 
 namespace LingualLoop.Api.Controllers;
@@ -47,7 +49,48 @@ public class UserController : ControllerBase
             Data = response
         });
     }
+
+    [HttpGet("{id}/learning-stats")]
+    public async Task<ActionResult<ApiResponse<GetProfileLearningStatsResponse>>> GetProfileLearningStats(
+        [FromRoute] string id)
+    {
+        var response = await _mediator.Send(new GetProfileLearningStatsRequest() { UserId = id });
+
+        return Ok(new ApiResponse<GetProfileLearningStatsResponse>()
+        {
+            Data = response
+        });
+    }
+
+    [HttpPost("{id}/daily-activity")]
+    public async Task<ActionResult<ApiResponse<RecordDailyActivityResponse>>> RecordDailyActivity(
+        [FromRoute] string id)
+    {
+        var response = await _mediator.Send(new RecordDailyActivityRequest() { UserId = id });
+
+        return Ok(new ApiResponse<RecordDailyActivityResponse>()
+        {
+            Data = response
+        });
+    }
     
+    [HttpPost("{id}/streak/resolve-freeze")]
+    public async Task<ActionResult<ApiResponse<RecordDailyActivityResponse>>> ResolveStreakFreeze(
+        [FromRoute] string id,
+        [FromQuery] bool useFreeze)
+    {
+        var response = await _mediator.Send(new ResolveStreakFreezeRequest
+        {
+            UserId = id,
+            UseFreeze = useFreeze
+        });
+
+        return Ok(new ApiResponse<RecordDailyActivityResponse>()
+        {
+            Data = response
+        });
+    }
+
     [HttpPost("update-score")]
     public async Task<ActionResult<ApiResponse<UpdateScoreResponse>>> UpdateScoreById([FromBody] UpdateScoreRequest request)
     {
@@ -55,6 +98,7 @@ public class UserController : ControllerBase
         {
             UserId = request.UserId,
             Point = request.Point,
+            BoostActive = request.BoostActive,
             KartyId = request.KartyId
         });
 
@@ -77,6 +121,7 @@ public class UserController : ControllerBase
                 {
                     UserId = updateScoreResponse.UserId,
                     Score = updateScoreResponse.Score,
+                    Experience = updateScoreResponse.Experience,
                     Lives = updateLivesResponse.Lives
                 }
             });
@@ -88,6 +133,7 @@ public class UserController : ControllerBase
             {
                 UserId = updateScoreResponse.UserId,
                 Score = updateScoreResponse.Score,
+                Experience = updateScoreResponse.Experience,
             }
         });
     }
@@ -96,13 +142,18 @@ public class UserController : ControllerBase
     public async Task<ActionResult<ApiResponse<UpdateLivesResponse>>> UpdateLivesById([FromBody] UpdateLivesRequest request)
     {
         var updateLivesResponse = await _mediator.Send(new UpdateLivesRequest() { UserId = request.UserId });
-        
-        return Ok(new ApiResponse<UpdateScoreResponse>()
+
+        // Bu uç oyuna giriş bedelidir: bilet düşülemediyse oyun açılmamalı.
+        // VideoController.GetRandomQuestionByUserId ile aynı kalıp.
+        if (!updateLivesResponse.Spent)
         {
-            Data = new UpdateScoreResponse()
-            {
-                Lives = updateLivesResponse.Lives
-            }
+            throw new LingualLoopException(ErrorCode.TheUserHasNoLives.CreateMessage(updateLivesResponse.Lives),
+                ErrorCode.TheUserHasNoLives.GetDescription(updateLivesResponse.Lives), HttpStatusCode.BadRequest);
+        }
+
+        return Ok(new ApiResponse<UpdateLivesResponse>()
+        {
+            Data = updateLivesResponse
         });
     }
     
@@ -113,6 +164,10 @@ public class UserController : ControllerBase
         
         var getLivesByIdResponse = await _mediator.Send(new GetLivesByIdRequest() { UserId = id });
 
+        var getLeagueByUserIdResponse = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id });
+
+        var getStreakResponse = await _mediator.Send(new GetStreakByIdRequest() { UserId = id });
+
         return Ok(new ApiResponse<GetScoreWithLivesByIdResponse>()
         {
             Data = new GetScoreWithLivesByIdResponse()
@@ -120,8 +175,49 @@ public class UserController : ControllerBase
                 UserId = id,
                 UserNickname = getScoreByIdResponse.UserNickname,
                 Score = getScoreByIdResponse.Score,
-                Lives = getLivesByIdResponse.Lives
+                Experience = getScoreByIdResponse.Experience,
+                Level = getScoreByIdResponse.Level,
+                LevelProgress = getScoreByIdResponse.LevelProgress,
+                LevelBandSize = getScoreByIdResponse.LevelBandSize,
+                Lives = getLivesByIdResponse.Lives,
+                MaxLives = getLivesByIdResponse.MaxLives,
+                // Tavandayken beklenen bir bilet yok; zamanlayıcı ancak
+                // tavandan ilk düşüşte kurulduğu için o durumda anlamsız.
+                NextTicketAt = getLivesByIdResponse.Lives < getLivesByIdResponse.MaxLives
+                    ? getLivesByIdResponse.LastLivesResetTime
+                    : null,
+                League = getLeagueByUserIdResponse,
+                Streak = getStreakResponse.CurrentStreak,
+                FreezeCount = getStreakResponse.FreezeCount,
+                PlayedToday = getStreakResponse.PlayedToday,
+                StreakWeek = getStreakResponse.Week
             }
+        });
+    }
+
+    [HttpGet("{id}/league")]
+    public async Task<ActionResult<ApiResponse<LeagueProgressResponse>>> GetLeagueByUserId([FromRoute] string id)
+    {
+        var response = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id });
+
+        return Ok(new ApiResponse<LeagueProgressResponse>()
+        {
+            Data = response
+        });
+    }
+
+    [HttpPost("{id}/league/promotion/acknowledge")]
+    public async Task<ActionResult<ApiResponse<AcknowledgeLeaguePromotionResponse>>>
+        AcknowledgeLeaguePromotion([FromRoute] string id)
+    {
+        var response = await _mediator.Send(new AcknowledgeLeaguePromotionRequest
+        {
+            UserId = id
+        });
+
+        return Ok(new ApiResponse<AcknowledgeLeaguePromotionResponse>
+        {
+            Data = response
         });
     }
     

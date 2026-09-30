@@ -28,4 +28,11 @@
       <ProjectReference Include="..\Service\Service.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="appsettings.Local.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

@@ -7,4 +7,10 @@ public class ResolveWrongKartyReviewResponse
     public bool IsMastered { get; set; }
     public int WrongCount { get; set; }
     public DateTime? ReviewedDate { get; set; }
+
+    /// <summary>
+    /// Bu cevap bekleyen son Rövanş kartını da kapattıysa verilen bilet.
+    /// Aynı çözüm isteği tekrarlandığında sıfır döner.
+    /// </summary>
+    public int RewardTickets { get; set; }
 }

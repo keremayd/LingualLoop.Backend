@@ -46,6 +46,26 @@ public class RecordWrongKartyCommandHandler : IRequestHandler<RecordWrongKartyRe
             history.ReviewedDate = null;
         }
 
+        // Yanlış cevap **iki** sistemi birden tetikler ve ikisi farklı soru
+        // sorar:
+        //   · Rövanş havuzu (yukarısı) — "hemen düzelt"
+        //   · Leitner kutusu (aşağısı) — "uzun vadede hatırlıyor musun"
+        // Yalnız biri çalışsaydı ya hata anında düzeltilir ama aralık
+        // korunur (kelime yanlış bilinmesine rağmen 30 gün sonra sorulur),
+        // ya da aralık sıfırlanır ama hata o an düzeltilmeden geçerdi.
+        await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+
+        var learning = await _context.UserKartyLearnings
+            .FirstOrDefaultAsync(
+                item => item.UserId == request.UserId && item.KartyId == request.KartyId,
+                cancellationToken);
+
+        if (learning is not null && learning.Box > 0)
+        {
+            learning.Box = KartyLeitner.Reset();
+            learning.DueDate = KartyLeitner.NextDue(learning.Box, DateTime.UtcNow);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return new RecordWrongKartyResponse

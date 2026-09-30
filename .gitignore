@@ -262,3 +262,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Makineye özel kimlik bilgileri; ortak ayarlar appsettings.json'da kalır.
+**/appsettings.Local.json

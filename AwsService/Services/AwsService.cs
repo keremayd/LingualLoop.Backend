@@ -2,32 +2,34 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using AwsService.Abstractions;
-using AwsService.Options;
-using Microsoft.Extensions.Options;
 using BucketType = Common.Enums.BucketType;
 
 namespace AwsService.Services;
 
 public class AwsService : IAwsService
 {
-    private readonly AwsOptions _options;
     private readonly IAmazonS3 _amazonClient;
     private readonly IAwsBucketNameFactory _bucketFactory;
 
-    public AwsService(IOptions<AwsOptions> options, IAmazonS3 amazonClient, IAwsBucketNameFactory bucketFactory)
+    public AwsService(IAmazonS3 amazonClient, IAwsBucketNameFactory bucketFactory)
     {
-        _options = options.Value;
         _amazonClient = amazonClient;
         _bucketFactory = bucketFactory;
     }
     
-    public async Task UploadFileAsync(string key, Stream fileStream, string contentType)
+    public async Task UploadFileAsync(
+        string key,
+        Stream fileStream,
+        string contentType,
+        BucketType bucketType = BucketType.ProfilePhotos)
     {
         var uploadRequest = new TransferUtilityUploadRequest
         {
             InputStream = fileStream,
             Key = key,
-            BucketName = _options.Buckets["ProfilePhotos"],
+            // Kova adı artık sözlükten elle okunmuyor, fabrikadan geliyor;
+            // eşleme tek yerde kalsın (`AwsBucketNameFactory`).
+            BucketName = _bucketFactory.GetBucketName(bucketType),
             ContentType = contentType
         };
 

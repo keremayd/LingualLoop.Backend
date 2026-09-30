@@ -66,4 +66,16 @@ public enum ErrorCode
     
     [Description("Kullanıcı UserVideo tablosunda bulunamadı! userid = {0}")]
     NoDataFoundInUserVideo = 4121,
+
+    [Description("Kart verisi geçersiz! sebep = {0}")]
+    KartyPayloadInvalid = 4122,
+
+    [Description("Bu kelime Karty tablosunda zaten var! nountext = {0}")]
+    KartyAlreadyExists = 4123,
+
+    [Description("Kart görseli S3'e yüklenemedi! hata = {0}")]
+    KartyAssetUploadFailed = 4124,
+
+    [Description("İçerik girişi anahtarı geçersiz ya da eksik!")]
+    KartyAdminKeyInvalid = 4125,
 }

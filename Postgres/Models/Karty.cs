@@ -15,6 +15,12 @@ public class Karty
     
     [Column("correct_text")]
     public string CorrectText { get; set; } = string.Empty;
+
+    [Column("noun_text")]
+    public string NounText { get; set; } = string.Empty;
+
+    [Column("article")]
+    public string Article { get; set; } = string.Empty;
     
     [Column("karty_url")]
     public string KartyUrl { get; set; } = string.Empty;
@@ -27,6 +33,16 @@ public class Karty
 
     [Column("max_score")]
     public int MaxScore { get; set; }
+
+    /// <summary>
+    /// Telaffuz sesinin S3 yolu. Ses henüz üretilmediyse <c>null</c>; o
+    /// kartta telaffuz butonu gösterilmez.
+    ///
+    /// İstemciye imzalı adres olarak gittiği için adı `AudioUrl`; kolon da
+    /// aynı adı taşıyor ki katmanlar arasında tek isim olsun.
+    /// </summary>
+    [Column("audio_url")]
+    public string? AudioUrl { get; set; }
 
     [Column("created_date")]
     public DateTime CreatedDate { get; set; }

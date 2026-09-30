@@ -16,6 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj" />
         <ProjectReference Include="..\Postgres\Postgres.csproj" />
+        <ProjectReference Include="..\AwsService\AwsService.csproj" />
     </ItemGroup>
 
     <ItemGroup>
