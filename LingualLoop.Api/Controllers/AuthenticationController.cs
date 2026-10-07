@@ -46,7 +46,8 @@ public class AuthenticationController : ControllerBase
             Password  =  request.Password,
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
-            Roles = request.Roles,
+            // Anonim kayıt isteği rol seçemez.
+            Roles = new List<string> { "User" },
         };
         
         var response = await _mediator.Send(registerUserRequest);
