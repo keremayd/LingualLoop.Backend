@@ -3,6 +3,10 @@ namespace Service.DataTransferObjects.Responses.Profile;
 public class GetProfileLearningStatsResponse
 {
     public int LearnedWordCount { get; set; }
+
+    /// <summary>Mevcut Karty zorluk bandında tekrar zamanı gelen kelimeler.</summary>
+    public int DueWordCount { get; set; }
+
     public int LearnedArticleCount { get; set; }
     public int ArticleInProgressCount { get; set; }
     public int ReviewPendingCount { get; set; }

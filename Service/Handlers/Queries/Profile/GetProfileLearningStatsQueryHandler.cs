@@ -36,6 +36,28 @@ public class GetProfileLearningStatsQueryHandler
         var pendingReviews = _context.UserKartyHistories
             .Where(history => history.UserId == request.UserId && history.ReviewedDate == null);
 
+        // Karty yalnızca mevcut zorluk bandındaki vadeli kartları önce sunar.
+        // Ana ekrandaki sayı aynı havuzu ölçmeli; bütün seviyelerdeki vadeleri
+        // sayarsak kullanıcıya bu oturumda göremeyeceği kartları vaat ederiz.
+        var userScore = await _context.UserScores
+            .AsNoTracking()
+            .Where(score => score.UserId == request.UserId)
+            .Select(score => (int?)score.Score)
+            .FirstOrDefaultAsync(cancellationToken);
+        var dueWordCount = 0;
+        var utcNow = DateTime.UtcNow;
+        if (userScore is int score)
+        {
+            var availableKartyIds = _context.Karty
+                .Where(karty => karty.MinScore <= score && karty.MaxScore >= score)
+                .Select(karty => karty.KartyId);
+            dueWordCount = await learnings.CountAsync(
+                learning => learning.Box > 0 &&
+                            learning.DueDate <= utcNow &&
+                            availableKartyIds.Contains(learning.KartyId),
+                cancellationToken);
+        }
+
         var streak = await _context.UserStreaks
             .AsNoTracking()
             .FirstOrDefaultAsync(
@@ -46,6 +68,7 @@ public class GetProfileLearningStatsQueryHandler
         {
             LearnedWordCount = await learnings
                 .CountAsync(learning => learning.CorrectCount > 0, cancellationToken),
+            DueWordCount = dueWordCount,
             LearnedArticleCount = await learnings
                 .CountAsync(learning => learning.ArticleCorrectCount >= ArticleLearningGoal, cancellationToken),
             ArticleInProgressCount = await learnings
