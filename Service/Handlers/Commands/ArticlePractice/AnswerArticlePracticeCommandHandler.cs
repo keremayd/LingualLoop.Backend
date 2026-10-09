@@ -12,7 +12,6 @@ namespace Service.Handlers.Commands.ArticlePractice;
 public class AnswerArticlePracticeCommandHandler
     : IRequestHandler<AnswerArticlePracticeRequest, AnswerArticlePracticeResponse>
 {
-    private const int CorrectAnswerPoints = 1;
     private readonly LingualLoopContext _context;
 
     public AnswerArticlePracticeCommandHandler(
@@ -55,11 +54,9 @@ public class AnswerArticlePracticeCommandHandler
 
         if (isCorrect)
         {
+            // Artikel bilgisi ayrı ilerler; Karty zorluk bandına kanıt sayılmaz.
             learning.ArticleCorrectCount += 1;
             learning.LastArticleAnsweredDate = DateTime.UtcNow;
-            var userScore = await _context.UserScores
-                .FirstOrDefaultAsync(item => item.UserId == request.UserId, cancellationToken);
-            if (userScore is not null) userScore.Score += CorrectAnswerPoints;
         }
 
         // Buraya yalnızca **kabul edilen** bir cevap ulaşıyor (geçersiz ve
@@ -74,7 +71,6 @@ public class AnswerArticlePracticeCommandHandler
             IsAccepted = true,
             IsCorrect = isCorrect,
             CorrectArticle = correctArticle,
-            EarnedPoints = isCorrect ? CorrectAnswerPoints : 0,
             ArticleAttemptCount = learning.ArticleAttemptCount,
             ArticleCorrectCount = learning.ArticleCorrectCount,
         };
