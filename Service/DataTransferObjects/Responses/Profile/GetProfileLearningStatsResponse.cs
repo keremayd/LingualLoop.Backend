@@ -2,6 +2,9 @@ namespace Service.DataTransferObjects.Responses.Profile;
 
 public class GetProfileLearningStatsResponse
 {
+    /// <summary>Tanışma kartında görülen veya en az bir kez doğru bilinen kelimeler.</summary>
+    public int EncounteredWordCount { get; set; }
+
     public int LearnedWordCount { get; set; }
 
     /// <summary>Mevcut Karty zorluk bandında tekrar zamanı gelen kelimeler.</summary>

@@ -62,6 +62,36 @@ public class UserController : ControllerBase
         });
     }
 
+    [Authorize]
+    [HttpGet("{id}/word-collection")]
+    public async Task<ActionResult<ApiResponse<GetWordCollectionResponse>>> GetWordCollection(
+        [FromRoute] string id,
+        [FromQuery] string category = "all",
+        [FromQuery] int page = 1)
+    {
+        if (!string.Equals(User.Identity?.Name, id, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new GetWordCollectionRequest
+        {
+            UserId = id,
+            Category = category,
+            Page = page,
+        });
+
+        foreach (var item in response.Items)
+        {
+            if (!string.IsNullOrEmpty(item.KartyUrl))
+                item.KartyUrl = _amazonService.GeneratePreSignedUrl(
+                    item.KartyUrl, BucketType.KartyAssets);
+            if (!string.IsNullOrEmpty(item.AudioUrl))
+                item.AudioUrl = _amazonService.GeneratePreSignedUrl(
+                    item.AudioUrl, BucketType.KartyAssets);
+        }
+
+        return Ok(new ApiResponse<GetWordCollectionResponse> { Data = response });
+    }
+
     [HttpPost("{id}/daily-activity")]
     public async Task<ActionResult<ApiResponse<RecordDailyActivityResponse>>> RecordDailyActivity(
         [FromRoute] string id)

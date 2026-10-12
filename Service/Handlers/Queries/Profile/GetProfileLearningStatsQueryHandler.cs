@@ -66,6 +66,9 @@ public class GetProfileLearningStatsQueryHandler
 
         return new GetProfileLearningStatsResponse
         {
+            EncounteredWordCount = await learnings.CountAsync(
+                learning => learning.IntroducedDate != null || learning.CorrectCount > 0,
+                cancellationToken),
             LearnedWordCount = await learnings
                 .CountAsync(learning => learning.CorrectCount > 0, cancellationToken),
             DueWordCount = dueWordCount,
