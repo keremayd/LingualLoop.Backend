@@ -39,6 +39,9 @@ public class GetScoreWithLivesByIdResponse
     /// <summary>Ana ekranın üst şeridi için: günlük seri ve elde kalan koruma.</summary>
     public int Streak { get; set; }
 
+    /// <summary>Geçmişte ulaşılan en uzun seri; ana ekran sahne seçimi için.</summary>
+    public int LongestStreak { get; set; }
+
     public int FreezeCount { get; set; }
 
     /// <summary>

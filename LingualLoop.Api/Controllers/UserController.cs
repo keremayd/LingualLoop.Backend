@@ -218,6 +218,7 @@ public class UserController : ControllerBase
                     : null,
                 League = getLeagueByUserIdResponse,
                 Streak = getStreakResponse.CurrentStreak,
+                LongestStreak = getStreakResponse.LongestStreak,
                 FreezeCount = getStreakResponse.FreezeCount,
                 PlayedToday = getStreakResponse.PlayedToday,
                 StreakWeek = getStreakResponse.Week
