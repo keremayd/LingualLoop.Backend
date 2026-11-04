@@ -8,20 +8,15 @@ public class GetScoreWithLivesByIdResponse
     public string UserId { get; set; } = string.Empty;
     public string UserNickname { get; set; } = string.Empty;
 
-    /// <summary>Zorluk termostatı; iki yönlü. Kullanıcıya ham gösterilmez.</summary>
+    /// <summary>
+    /// Eski zorluk termostatı. 4 Kas 2026'dan beri hiçbir şeyi belirlemiyor ve
+    /// oynatılmıyor (içerik Karty Yolu üniteleriyle açılıyor); alan istemci
+    /// modelleri kırılmasın diye duruyor. Kullanıcıya gösterilmez.
+    /// </summary>
     public int Score { get; set; }
 
     /// <summary>İlerleme sayacı; yalnızca artar. Kullanıcıya gösterilen sayı.</summary>
     public int Experience { get; set; }
-
-    /// <summary>Skordan türetilen zorluk seviyesi. Kullanıcı ham skoru değil bunu görür.</summary>
-    public int Level { get; set; }
-
-    /// <summary>Bulunulan seviyenin içindeki ilerleme (0 → LevelBandSize).</summary>
-    public int LevelProgress { get; set; }
-
-    /// <summary>Bir seviyenin kapsadığı skor aralığı; ilerleme çubuğu için.</summary>
-    public int LevelBandSize { get; set; }
 
     public int Lives { get; set; }
 

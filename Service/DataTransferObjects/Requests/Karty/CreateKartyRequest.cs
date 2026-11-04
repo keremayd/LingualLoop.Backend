@@ -19,18 +19,12 @@ public class CreateKartyRequest : IRequest<CreateKartyResponse>
     public string Article { get; set; } = string.Empty;
 
     /// <summary>
-    /// Zorluk bandı. `GetKartyByScore` kullanıcının skoruna göre bu aralıktan
-    /// seçim yapıyor; §8'deki açık borç yüzünden şu an havuzda yalnız 0 ve
-    /// 100 bantları var.
-    /// </summary>
-    public int MinScore { get; set; }
-
-    public int MaxScore { get; set; }
-
-    /// <summary>
-    /// Karty Yolu ünitesi (sırası: 1, 2, …). Verilmezse kart, aynı puan
-    /// bandındaki kartların ünitesine eklenir; öyle bir ünite yoksa sonuncuya.
-    /// Güncellemede verilmezse kartın ünitesi değişmez.
+    /// Karty Yolu ünitesi (sırası: 1, 2, …). Verilmezse kart son üniteye
+    /// eklenir. Güncellemede verilmezse kartın ünitesi değişmez.
+    ///
+    /// Kartın zorluk bandı (<c>minScore</c>/<c>maxScore</c>) 4 Kas 2026'da
+    /// kalktı: kelimenin ne zaman geleceğini artık ünitesi ve ünite içindeki
+    /// sırası belirliyor.
     /// </summary>
     public int? UnitSequence { get; set; }
 

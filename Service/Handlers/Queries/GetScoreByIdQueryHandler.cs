@@ -42,9 +42,6 @@ public class GetScoreByIdQueryHandler : IRequestHandler<GetScoreByIdRequest, Get
             UserId = user.Id,
             Score = user.UserScore.Score,
             Experience = user.UserScore.Experience,
-            Level = LevelRules.GetLevel(user.UserScore.Score),
-            LevelProgress = LevelRules.GetProgressInLevel(user.UserScore.Score),
-            LevelBandSize = LevelRules.BandSize
         };
     }
 }

@@ -71,30 +71,6 @@ public static class KartyLeitner
         learning.DueDate is null || learning.DueDate <= utcNow;
 
     /// <summary>
-    /// Doğru cevabın **zorluk termostatını** oynatmaya yetip yetmediği.
-    ///
-    /// Termostat (<c>user_scores.score</c>) kart bandını seçiyor, yani
-    /// "bu zorluk sana kolay geliyor" çıkarımını yapıyor. O çıkarım
-    /// kartlar **rastgele** dağıtılırken kurulmuştu; zamanlayıcı geldikten
-    /// sonra havuz ağırlıkla kullanıcının **zaten bildiği** kelimelerden
-    /// oluşuyor. Aynı formül artık aynı girdiyi almıyor: yanlı bir örneklemi
-    /// okuyan termostat kaçınılmaz olarak yukarı kayar.
-    ///
-    /// Bu yüzden yalnız **kanıt** sayılır:
-    /// <list type="bullet">
-    ///   <item>kartın ilk testi (kutu 0) — kelimeyi gerçekten ilk kez bildi;</item>
-    ///   <item>vadesi gelmiş tekrar — aradan zaman geçmişken hatırladı.</item>
-    /// </list>
-    ///
-    /// Vadesi gelmemiş bir kartı aynı gün tekrar bilmek pratiktir, ölçüm
-    /// değil: XP, lig puanı ve seri kazandırır ama zorluğu oynatmaz. Kural,
-    /// <see cref="IsDue"/> ile kutunun ilerlemesini yöneten kuralın aynısı —
-    /// iki sistem tek kapıdan geçsin diye böyle.
-    /// </summary>
-    public static bool CountsAsEvidence(UserKartyLearning? learning, DateTime utcNow) =>
-        learning is null || learning.Box == 0 || IsDue(learning, utcNow);
-
-    /// <summary>
     /// Tekrar vakti gelmiş kelime: en az bir kez doğru bilinmiş (kutu &gt; 0)
     /// ve vadesi dolmuş. Seçicinin 1. aşaması, ana ekrandaki "N kelimeyi
     /// tekrar et" sayısı ve Kelimelerim'in Tekrar filtresi **bu** tanımı

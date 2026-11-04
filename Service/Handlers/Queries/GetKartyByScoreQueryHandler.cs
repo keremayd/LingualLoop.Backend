@@ -27,10 +27,11 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
         await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
-        // Kart artık banttan rastgele seçilmiyor: önce vadesi gelmiş tekrar,
-        // sonra günlük kotayla sınırlı yeni kelime. Sıra `KartyScheduler`'da.
+        // Kart puan bandından rastgele seçilmiyor: önce vadesi gelmiş tekrar,
+        // sonra günlük kotayla sınırlı, ünite sırasıyla yeni kelime. Sıra
+        // `KartyScheduler`'da.
         var selectedKartyId = await KartyScheduler.SelectKartyIdAsync(
-            _context, request.UserId, request.UserScore, DateTime.UtcNow, cancellationToken);
+            _context, request.UserId, DateTime.UtcNow, cancellationToken);
 
         var karty = selectedKartyId is null
             ? null
@@ -50,8 +51,8 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
 
         if (karty is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataFoundInKarty.CreateMessage(request.UserScore),
-                ErrorCode.NoDataFoundInKarty.GetDescription(request.UserScore), HttpStatusCode.BadRequest);
+            throw new LingualLoopException(ErrorCode.NoDataFoundInKarty.CreateMessage(request.UserId),
+                ErrorCode.NoDataFoundInKarty.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
 
         // Kart seçildi; **nasıl sunulacağı** ayrı bir karar ve kullanıcının o

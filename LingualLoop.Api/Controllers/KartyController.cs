@@ -9,7 +9,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Requests.Karty;
 using Service.DataTransferObjects.Responses;
 using Service.DataTransferObjects.Responses.Karty;
@@ -38,10 +37,8 @@ public class KartyController : ControllerBase
     [HttpGet("random/{userId}")]
     public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] string userId)
     {
-        var userScoreResponse = await _mediator.Send(new GetScoreByIdRequest() { UserId = userId });
+        var kartyQuestion = await _mediator.Send(new GetKartyByScoreRequest() { UserId = userId });
 
-        var kartyQuestion = await _mediator.Send(new GetKartyByScoreRequest() { UserScore = userScoreResponse.Score, UserId = userScoreResponse.UserId });
-        
         // Yanıt **yeniden kurulmuyor**, yalnız imzalı URL yazılıyor.
         //
         // Eskiden burada alan alan yeni bir nesne oluşturuluyordu; handler'a
@@ -204,8 +201,6 @@ public class KartyController : ControllerBase
             {
                 NounText = form.NounText,
                 Article = form.Article,
-                MinScore = form.MinScore,
-                MaxScore = form.MaxScore,
                 UnitSequence = form.UnitSequence,
                 UnitOrder = form.UnitOrder,
                 OverwriteExisting = form.OverwriteExisting,
@@ -278,8 +273,6 @@ public class CreateKartyForm
 {
     public string NounText { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
-    public int MinScore { get; set; }
-    public int MaxScore { get; set; } = 100;
     public int? UnitSequence { get; set; }
     public int? UnitOrder { get; set; }
     public bool OverwriteExisting { get; set; }

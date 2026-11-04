@@ -28,6 +28,11 @@ public class Karty
     [Column("is_correct")]
     public bool IsCorrect { get; set; }
 
+    /// <summary>
+    /// Eski zorluk bandı (<c>max_score</c> ile birlikte). 4 Kas 2026'dan beri
+    /// okunmuyor: kelimenin ne zaman geleceğini ünitesi ve sırası belirliyor.
+    /// Yeni kartlarda 0; istemci modeli alanı beklediği için yanıtta duruyor.
+    /// </summary>
     [Column("min_score")] 
     public int MinScore { get; set; }
 

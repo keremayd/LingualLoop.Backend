@@ -206,9 +206,6 @@ public class UserController : ControllerBase
                 UserNickname = getScoreByIdResponse.UserNickname,
                 Score = getScoreByIdResponse.Score,
                 Experience = getScoreByIdResponse.Experience,
-                Level = getScoreByIdResponse.Level,
-                LevelProgress = getScoreByIdResponse.LevelProgress,
-                LevelBandSize = getScoreByIdResponse.LevelBandSize,
                 Lives = getLivesByIdResponse.Lives,
                 MaxLives = getLivesByIdResponse.MaxLives,
                 // Tavandayken beklenen bir bilet yok; zamanlayıcı ancak

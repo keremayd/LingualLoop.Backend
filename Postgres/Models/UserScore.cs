@@ -11,10 +11,11 @@ public class UserScore
     public int UserScoreId { get; set; }
 
     /// <summary>
-    /// Zorluk termostatı. Doğru cevapta artar, yanlış cevapta azalır;
-    /// `GetKartyByScore` hangi zorluk bandından kart geleceğini buna göre
-    /// seçer. Kullanıcıya ham hâliyle gösterilmez — düşmesi bir kayıp değil,
-    /// kalibrasyondur.
+    /// Eski zorluk termostatı. Doğru cevapta artıp yanlışta azalıyor ve
+    /// kartın hangi zorluk bandından geleceğini seçiyordu. 4 Kas 2026'dan
+    /// beri **ne yazılıyor ne okunuyor**: içerik Karty Yolu üniteleriyle
+    /// açılıyor (<c>KartyUnitRules</c>). Kolon, API yanıtlarındaki alan ve
+    /// eski satırlar yüzünden duruyor; yeni bir işe bağlanmamalı.
     /// </summary>
     [Column("score")]
     public int Score { get; set; }

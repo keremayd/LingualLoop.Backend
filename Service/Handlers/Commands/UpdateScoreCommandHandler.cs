@@ -3,7 +3,6 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Postgres;
 using Postgres.Abstractions;
 using Postgres.Models;
@@ -44,38 +43,16 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
 
         var utcNow = DateTime.UtcNow;
 
-        // Termostatın kararı, kutu ilerlemeden **önce** okunmalı:
-        // `KartyLearningRecorder.RecordAsync` birazdan kutuyu ve vadeyi
-        // değiştiriyor; sonra bakılsaydı her cevap kanıt sayılırdı.
-        UserKartyLearning? learning = null;
-        if (request.KartyId.HasValue)
-        {
-            await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
-            learning = await _context.UserKartyLearnings
-                .FirstOrDefaultAsync(
-                    item => item.UserId == request.UserId && item.KartyId == request.KartyId.Value,
-                    cancellationToken);
-        }
-
-        // İki ayrı büyüklük: biri **ölçüm**, diğeri **ödül**. Tek sayıya
-        // bindirildiklerinde boost çarpanı zorluğu da üçe katlıyordu.
         var isCorrect = request.Point > 0;
         var rewardPoints = isCorrect ? (request.BoostActive ? 3 : 1) : 0;
-        var thermostatDelta = isCorrect
-            ? (KartyLeitner.CountsAsEvidence(learning, utcNow) ? 1 : 0)
-            : -1;
 
-        // Zorluk termostatı: iki yönlü hareket eder, kart bandını belirler.
-        // Boost buraya **hiç** dokunmaz — ödül çarpanıyla bir ölçümü çarpmak,
-        // hızlı cevap verildi diye termometreyi üçe katlamak olurdu.
+        // İlerleme sayacı: yalnızca kazanç yönünde işler; yanlış cevap
+        // kullanıcının kazandığını geri almaz.
         //
-        // Yanlış cevap her koşulda düşürür: unutmak da kanıttır, hatta vadesi
-        // gelmemiş bir kelimeyi bilememek daha güçlü bir kanıttır.
-        userScore.Score += thermostatDelta;
-        userScore.Score = Math.Max(0, userScore.Score);
-
-        // İlerleme sayacı: yalnızca kazanç yönünde işler. Yanlış cevap
-        // zorluğu aşağı çeker ama kullanıcının kazandığını geri almaz.
+        // `score` (eski zorluk termostatı) burada artık oynatılmıyor
+        // (4 Kas 2026). Kart bandını seçen termostat, yeni kelimeler Karty
+        // Yolu ünitelerinin sırasıyla gelmeye başlayınca anlamını yitirdi:
+        // içerik öğrenmeyle açılıyor (`KartyUnitRules`), puanla değil.
         userScore.Experience += rewardPoints;
 
         await UserLeagueProgressSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
@@ -88,11 +65,10 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
             utcNow,
             cancellationToken);
 
-        // Lig puanı da XP gibi tek yönlüdür: yanlış cevap zorluğu aşağı çeker
-        // ama kazanılmış sıralamayı geri almaz. İki yönlü olduğunda kullanıcı
-        // aktif oynarken lig sıralamasında gerileyebiliyordu — "oynadım ve
-        // geriye gittim" en demoralize edici geri bildirim. Ayrıca üst banda
-        // tırmanmayı deneyeni güvenli oynayana göre cezalandırıyordu.
+        // Lig puanı da XP gibi tek yönlüdür: yanlış cevap kazanılmış
+        // sıralamayı geri almaz. İki yönlü olduğunda kullanıcı aktif
+        // oynarken lig sıralamasında gerileyebiliyordu — "oynadım ve
+        // geriye gittim" en demoralize edici geri bildirim.
         //
         // Rastgele oynayıp puan biriktirme riski bilet ekonomisiyle sınırlanır:
         // giriş 1 bilet + her yanlış 1 bilet, tavan 15.
@@ -107,6 +83,7 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
 
         if (isCorrect && request.KartyId.HasValue)
         {
+            await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
             await KartyLearningRecorder.RecordAsync(
                 _context,
                 request.UserId,

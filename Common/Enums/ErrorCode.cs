@@ -52,7 +52,7 @@ public enum ErrorCode
     [Description("Kullanıcının lives yeterli değil! lives = {0}")]
     TheUserHasNoLives = 4116,
     
-    [Description("Kullanıcının puanına uygun soru Karty tablosunda bulunamadı! userscore = {0}")]
+    [Description("Kullanıcıya sunulacak kart Karty tablosunda bulunamadı! userid = {0}")]
     NoDataFoundInKarty = 4117,
     
     [Description("Badge tablosunda rozet bulunamadı! badgeid = {0}")]

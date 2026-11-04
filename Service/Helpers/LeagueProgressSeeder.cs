@@ -7,9 +7,10 @@ namespace Service.Helpers;
 /// <summary>
 /// Kullanıcının mevcut sezon lig kaydını getirir veya oluşturur.
 /// Kullanıcının hiç lig kaydı yoksa (lig sistemi öncesi hesaplar) ilk kayıt
-/// toplam skorundan tohumlanır; sonraki sezonlar 0 puandan başlar.
-/// Lig puanı ve toplam skor bilinçli olarak ayrı sayaçlardır: toplam skor
-/// içerik zorluğunu belirler ve resetlenmez, sezon puanı her sezon sıfırlanır.
+/// toplam puanından (XP, <c>experience</c>) tohumlanır; sonraki sezonlar
+/// "bir kademe alttan" başlar. Lig puanı ve XP bilinçli olarak ayrı
+/// sayaçlardır: XP ömür boyu birikir ve sıfırlanmaz, sezon puanı her sezon
+/// yeniden tabanlanır.
 /// </summary>
 public static class LeagueProgressSeeder
 {
@@ -38,11 +39,13 @@ public static class LeagueProgressSeeder
         int seedPoints;
         if (previousSeason is null)
         {
-            // Lig sistemine ilk giriş: mevcut toplam skor sezon puanına taşınır.
+            // Lig sistemine ilk giriş: mevcut toplam puan (XP) sezon puanına
+            // taşınır. Eskiden zorluk termostatı (`score`) kullanılıyordu;
+            // termostat 4 Kas 2026'da emekli oldu.
             seedPoints = await context.UserScores
                 .AsNoTracking()
                 .Where(s => s.UserId == userId)
-                .Select(s => (int?)s.Score)
+                .Select(s => (int?)s.Experience)
                 .FirstOrDefaultAsync(cancellationToken) ?? 0;
         }
         else

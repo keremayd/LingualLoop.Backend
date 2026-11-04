@@ -5,8 +5,6 @@ public class CreateKartyResponse
     public int KartyId { get; set; }
     public string NounText { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
-    public int MinScore { get; set; }
-    public int MaxScore { get; set; }
 
     /// <summary>Kartın girdiği Karty Yolu ünitesi; hiç ünite yoksa <c>null</c>.</summary>
     public int? UnitSequence { get; set; }

@@ -37,13 +37,15 @@ namespace Service.Helpers;
 /// <see cref="KartyLeitner"/>, gün sınırı <see cref="IstanbulDay"/>, ünite
 /// kapısı <see cref="KartyUnitRules"/> içinde.
 ///
-/// ## Puan bandı artık kart süzmüyor (Karty Yolu, 4 Kasım 2026)
+/// ## Puan bandı yok (Karty Yolu, 4 Kasım 2026)
 ///
 /// Yeni kelime ünite sırasıyla geliyor, sıradaki ünite öğrenmeyle açılıyor.
 /// Tekrar, test ve pratik aşamaları kullanıcının tanıştığı **bütün**
-/// kelimelerden seçiyor: puan yanlışta düştüğü için bant, vadesi gelmiş
-/// tekrarları gizleyebiliyordu. <c>userScore</c> yalnız hiç ünite
-/// tanımlanmamış (boş) veritabanında eski davranış için kullanılıyor.
+/// kelimelerden seçiyor. Eskiden her aşama kullanıcının zorluk puanının
+/// bandıyla süzülüyordu; puan yanlışta düştüğü için bant vadesi gelmiş
+/// tekrarları gizleyebiliyordu. Puan (termostat) emekli oldu, seçici onu
+/// hiç okumuyor. Hiç ünite tanımlanmamış (boş) veritabanında yeni kelime
+/// görülmemiş kartlardan rastgele gelir.
 /// </summary>
 public static class KartyScheduler
 {
@@ -80,7 +82,6 @@ public static class KartyScheduler
     public static async Task<int?> SelectKartyIdAsync(
         LingualLoopContext context,
         string userId,
-        int userScore,
         DateTime utcNow,
         CancellationToken cancellationToken)
     {
@@ -144,10 +145,7 @@ public static class KartyScheduler
                 ? await NextNewKartyIdAsync(
                     context, units, seenKartyIds, introducedToday, cancellationToken)
                 : await context.Karty
-                    .Where(karty =>
-                        karty.MinScore <= userScore &&
-                        karty.MaxScore >= userScore &&
-                        !seenKartyIds.Contains(karty.KartyId))
+                    .Where(karty => !seenKartyIds.Contains(karty.KartyId))
                     .OrderBy(karty => EF.Functions.Random())
                     .Select(karty => (int?)karty.KartyId)
                     .FirstOrDefaultAsync(cancellationToken);
@@ -166,12 +164,11 @@ public static class KartyScheduler
             .ToListAsync(cancellationToken);
         if (practiceIds.Count > 0) return PickRandom(practiceIds);
 
-        // 5 — İlk oturum: hiç öğrenme kaydı yok, banttan rastgele.
-        //
-        // Yalnız bu durumda banda dokunuluyor. Kota dolduğunda buraya
-        // düşülseydi tanışmamış bir kart seçilir ve tavan aşılırdı.
+        // 5 — Hiç öğrenme kaydı yok ve 3. aşama kart bulamadı (yalnız
+        // kartı olmayan ünitelerde ya da ünitesiz kartlarda olur): son çare
+        // olarak herhangi bir kart. Kota dolduğunda buraya düşülemez — kota
+        // ancak tanışılmış kelimeyle dolar, o da 4. aşamada döner.
         return await context.Karty
-            .Where(karty => karty.MinScore <= userScore && karty.MaxScore >= userScore)
             .OrderBy(karty => EF.Functions.Random())
             .Select(karty => (int?)karty.KartyId)
             .FirstOrDefaultAsync(cancellationToken);

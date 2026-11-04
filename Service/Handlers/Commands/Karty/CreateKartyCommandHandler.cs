@@ -93,9 +93,9 @@ public class CreateKartyCommandHandler
 
         karty.NounText = nounText;
         karty.Article = article;
-        karty.MinScore = request.MinScore;
-        karty.MaxScore = request.MaxScore;
         // Okunmayan ama şemada duran kolonlar; eski satırlarla aynı biçim.
+        // `min_score`/`max_score` (eski zorluk bandı) da artık okunmuyor;
+        // yeni kartta varsayılan 0 kalıyor, güncellemede dokunulmuyor.
         karty.QuestionText = nounText;
         karty.CorrectText = nounText;
         karty.IsCorrect = true;
@@ -144,8 +144,6 @@ public class CreateKartyCommandHandler
             KartyId = karty.KartyId,
             NounText = nounText,
             Article = article,
-            MinScore = request.MinScore,
-            MaxScore = request.MaxScore,
             UnitSequence = karty.UnitId is int unitId
                 ? await _context.KartyUnits
                     .Where(unit => unit.KartyUnitId == unitId)
@@ -224,11 +222,10 @@ public class CreateKartyCommandHandler
     /// sırasıyla geldiği için ünitesiz kart oyunda hiç yeni kelime olarak
     /// çıkmaz.
     ///
-    /// Ünite verilmezse kart, **aynı puan bandındaki** kartların ünitesine
-    /// gider (geçiş döneminde bantlar ünite oldu); öyle bir ünite yoksa
-    /// sonuncuya. Güncellemede ünite verilmezse yeri değişmez. Hiç ünite
-    /// tanımlanmamışsa kart ünitesiz kalır ve seçici eski bant davranışını
-    /// sürdürür.
+    /// Ünite verilmezse kart **son** üniteye gider: yeni içerik çoğunlukla
+    /// yolun sonuna eklenir. Güncellemede ünite verilmezse yeri değişmez.
+    /// Hiç ünite tanımlanmamışsa kart ünitesiz kalır; seçici o durumda yeni
+    /// kelimeyi görülmemiş kartlardan rastgele verir.
     /// </summary>
     private async Task PlaceInUnitAsync(
         KartyModel karty,
@@ -259,16 +256,10 @@ public class CreateKartyCommandHandler
         }
         else
         {
-            unitId = await _context.Karty
-                         .Where(item => item.MinScore == request.MinScore && item.UnitId != null)
-                         .GroupBy(item => item.UnitId)
-                         .OrderByDescending(group => group.Count())
-                         .Select(group => group.Key)
-                         .FirstOrDefaultAsync(cancellationToken)
-                     ?? await _context.KartyUnits
-                         .OrderByDescending(unit => unit.Sequence)
-                         .Select(unit => (int?)unit.KartyUnitId)
-                         .FirstOrDefaultAsync(cancellationToken);
+            unitId = await _context.KartyUnits
+                .OrderByDescending(unit => unit.Sequence)
+                .Select(unit => (int?)unit.KartyUnitId)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         if (unitId is null) return;
@@ -307,8 +298,6 @@ public class CreateKartyCommandHandler
         else if (!KartyAssetRules.IsAllowedImageExtension(extension))
             problem = $"Desteklenmeyen görsel türü: '{extension}'. " +
                       $"İzin verilenler: {string.Join(", ", KartyAssetRules.AllowedImageTypes.Keys)}";
-        else if (request.MinScore < 0 || request.MaxScore < request.MinScore)
-            problem = "Skor bandı geçersiz (minScore >= 0 ve maxScore >= minScore olmalı).";
 
         if (problem is null) return;
 
