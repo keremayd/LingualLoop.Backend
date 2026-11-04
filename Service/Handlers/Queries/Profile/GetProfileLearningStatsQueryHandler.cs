@@ -36,27 +36,12 @@ public class GetProfileLearningStatsQueryHandler
         var pendingReviews = _context.UserKartyHistories
             .Where(history => history.UserId == request.UserId && history.ReviewedDate == null);
 
-        // Karty yalnızca mevcut zorluk bandındaki vadeli kartları önce sunar.
-        // Ana ekrandaki sayı aynı havuzu ölçmeli; bütün seviyelerdeki vadeleri
-        // sayarsak kullanıcıya bu oturumda göremeyeceği kartları vaat ederiz.
-        var userScore = await _context.UserScores
-            .AsNoTracking()
-            .Where(score => score.UserId == request.UserId)
-            .Select(score => (int?)score.Score)
-            .FirstOrDefaultAsync(cancellationToken);
-        var dueWordCount = 0;
-        var utcNow = DateTime.UtcNow;
-        if (userScore is int score)
-        {
-            var availableKartyIds = _context.Karty
-                .Where(karty => karty.MinScore <= score && karty.MaxScore >= score)
-                .Select(karty => karty.KartyId);
-            dueWordCount = await learnings.CountAsync(
-                learning => learning.Box > 0 &&
-                            learning.DueDate <= utcNow &&
-                            availableKartyIds.Contains(learning.KartyId),
-                cancellationToken);
-        }
+        // Ana ekrandaki sayı, Karty'nin önce sunacağı havuzu ölçer; tanım
+        // seçicininkiyle aynı (KartyLeitner.DueForReview). Bir dönem burada
+        // puan bandı da aranıyordu; seçici bandı bırakınca bu sayı da bıraktı.
+        var dueWordCount = await learnings.CountAsync(
+            KartyLeitner.DueForReview(DateTime.UtcNow),
+            cancellationToken);
 
         var streak = await _context.UserStreaks
             .AsNoTracking()

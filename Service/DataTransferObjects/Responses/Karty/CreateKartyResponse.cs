@@ -8,6 +8,11 @@ public class CreateKartyResponse
     public int MinScore { get; set; }
     public int MaxScore { get; set; }
 
+    /// <summary>Kartın girdiği Karty Yolu ünitesi; hiç ünite yoksa <c>null</c>.</summary>
+    public int? UnitSequence { get; set; }
+
+    public int? UnitOrder { get; set; }
+
     /// <summary>Görselin S3 anahtarı (imzalı adres değil).</summary>
     public string KartyUrl { get; set; } = string.Empty;
 

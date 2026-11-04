@@ -114,6 +114,8 @@ public static class KartyLearningSchemaHelper
                 ON user_karty_learning (user_id, last_article_served_date DESC);
             """,
                 cancellationToken);
+            // `Karty` satırını tam yükleyen sorgular ünite kolonlarını da okur.
+            await KartyUnitSchemaHelper.EnsureCreatedAsync(context, cancellationToken);
             _isReady = true;
         }
         finally

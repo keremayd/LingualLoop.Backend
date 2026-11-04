@@ -52,6 +52,8 @@ public class KartyAudioSyncJob
     {
         var cancellationToken = CancellationToken.None;
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        // `Karty` satırları tam yükleniyor; ünite kolonları da var olmalı.
+        await KartyUnitSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
         // Eski adlandırmayla yazılmış yolları yalnız **buradan** temizliyoruz;
         // okuma yolu veri değiştirmemeli.
         await KartyAudioSchemaHelper.NormalizeLegacyPathsAsync(

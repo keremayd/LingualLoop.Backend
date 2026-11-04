@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Postgres.Models;
 
 namespace Service.Helpers;
@@ -92,4 +93,21 @@ public static class KartyLeitner
     /// </summary>
     public static bool CountsAsEvidence(UserKartyLearning? learning, DateTime utcNow) =>
         learning is null || learning.Box == 0 || IsDue(learning, utcNow);
+
+    /// <summary>
+    /// Tekrar vakti gelmiş kelime: en az bir kez doğru bilinmiş (kutu &gt; 0)
+    /// ve vadesi dolmuş. Seçicinin 1. aşaması, ana ekrandaki "N kelimeyi
+    /// tekrar et" sayısı ve Kelimelerim'in Tekrar filtresi **bu** tanımı
+    /// kullanır; üçü bir dönem ayrı ayrı yazılmıştı.
+    ///
+    /// Puan bandı yok: içerik artık ünitelerle açılıyor (<see cref="KartyUnitRules"/>)
+    /// ve vadesi gelen kelime puan düştü diye gizlenmemeli — aralıklı tekrarın
+    /// bütün değeri unutmaya yakın anda sormakta.
+    /// </summary>
+    public static Expression<Func<UserKartyLearning, bool>> DueForReview(DateTime utcNow) =>
+        learning => learning.Box > 0 && learning.DueDate <= utcNow;
+
+    /// <inheritdoc cref="DueForReview"/>
+    public static bool IsDueForReview(int box, DateTime? dueDate, DateTime utcNow) =>
+        box > 0 && dueDate <= utcNow;
 }

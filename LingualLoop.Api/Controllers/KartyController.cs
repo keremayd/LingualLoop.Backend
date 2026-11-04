@@ -62,6 +62,41 @@ public class KartyController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Karty Yolu: üniteler, geçmiş günler, bugün, yarın ve kilitli
+    /// üniteler. Yalnız token sahibi kendi yolunu okuyabilir.
+    /// </summary>
+    [Authorize]
+    [HttpGet("path/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetKartyPathResponse>>> GetPath([FromRoute] string userId)
+    {
+        if (!string.Equals(User.Identity?.Name, userId, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new GetKartyPathRequest { UserId = userId });
+
+        string Sign(string key) =>
+            _amazonService.GeneratePreSignedUrl(key, BucketType.KartyAssets);
+
+        foreach (var unit in response.Units)
+        {
+            if (!string.IsNullOrEmpty(unit.EmblemUrl)) unit.EmblemUrl = Sign(unit.EmblemUrl);
+            foreach (var step in unit.Steps)
+            {
+                foreach (var word in step.Words)
+                {
+                    if (!string.IsNullOrEmpty(word.KartyUrl)) word.KartyUrl = Sign(word.KartyUrl);
+                }
+                step.UpcomingImageUrls = step.UpcomingImageUrls
+                    .Where(key => !string.IsNullOrEmpty(key))
+                    .Select(Sign)
+                    .ToList();
+            }
+        }
+
+        return Ok(new ApiResponse<GetKartyPathResponse> { Data = response });
+    }
+
     [Authorize]
     [HttpGet("wrong/random/{userId}")]
     public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomWrongKartyByUserId([FromRoute] string userId)
@@ -171,6 +206,8 @@ public class KartyController : ControllerBase
                 Article = form.Article,
                 MinScore = form.MinScore,
                 MaxScore = form.MaxScore,
+                UnitSequence = form.UnitSequence,
+                UnitOrder = form.UnitOrder,
                 OverwriteExisting = form.OverwriteExisting,
                 ImageFileName = form.Image.FileName,
                 ImageContent = buffer.ToArray(),
@@ -178,6 +215,32 @@ public class KartyController : ControllerBase
             cancellationToken);
 
         return Ok(new ApiResponse<CreateKartyResponse> { Data = response });
+    }
+
+    /// <summary>
+    /// Karty Yolu ünitesini açar ya da adını / başlık görselini değiştirir.
+    /// Başlık görseli ünitenin kartlarından birinin görseli
+    /// (<c>emblemKartyId</c>); ayrı yükleme yok. Kimlik: `X-Karty-Admin-Key`.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPut("admin/units/{sequence:int}")]
+    public async Task<ActionResult<ApiResponse<UpsertKartyUnitResponse>>> UpsertUnit(
+        [FromRoute] int sequence,
+        [FromBody] UpsertKartyUnitBody body,
+        CancellationToken cancellationToken)
+    {
+        EnsureAdminKey();
+
+        var response = await _mediator.Send(
+            new UpsertKartyUnitRequest
+            {
+                Sequence = sequence,
+                Title = body.Title,
+                EmblemKartyId = body.EmblemKartyId,
+            },
+            cancellationToken);
+
+        return Ok(new ApiResponse<UpsertKartyUnitResponse> { Data = response });
     }
 
     /// <summary>
@@ -217,6 +280,15 @@ public class CreateKartyForm
     public string Article { get; set; } = string.Empty;
     public int MinScore { get; set; }
     public int MaxScore { get; set; } = 100;
+    public int? UnitSequence { get; set; }
+    public int? UnitOrder { get; set; }
     public bool OverwriteExisting { get; set; }
     public IFormFile? Image { get; set; }
+}
+
+/// <summary>Ünite açma / yeniden adlandırma gövdesi.</summary>
+public class UpsertKartyUnitBody
+{
+    public string? Title { get; set; }
+    public int? EmblemKartyId { get; set; }
 }

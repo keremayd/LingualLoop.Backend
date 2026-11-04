@@ -44,6 +44,17 @@ public class Karty
     [Column("audio_url")]
     public string? AudioUrl { get; set; }
 
+    /// <summary>
+    /// Kartın Karty Yolu'ndaki ünitesi (<see cref="KartyUnit"/>). Yeni kelime
+    /// artık puan bandından rastgele değil, ünite sırasıyla geliyor.
+    /// </summary>
+    [Column("unit_id")]
+    public int? UnitId { get; set; }
+
+    /// <summary>Ünite içindeki sırası; aynı sıradakiler <c>karty_id</c> ile ayrılır.</summary>
+    [Column("unit_order")]
+    public int? UnitOrder { get; set; }
+
     [Column("created_date")]
     public DateTime CreatedDate { get; set; }
 }

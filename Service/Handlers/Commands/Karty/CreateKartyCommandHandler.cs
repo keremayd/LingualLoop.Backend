@@ -67,6 +67,7 @@ public class CreateKartyCommandHandler
         CancellationToken cancellationToken)
     {
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        await KartyUnitSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
         var nounText = (request.NounText ?? string.Empty).Trim();
         var article = (request.Article ?? string.Empty).Trim().ToLowerInvariant();
@@ -98,6 +99,8 @@ public class CreateKartyCommandHandler
         karty.QuestionText = nounText;
         karty.CorrectText = nounText;
         karty.IsCorrect = true;
+
+        await PlaceInUnitAsync(karty, request, isUpdate, cancellationToken);
 
         if (!isUpdate)
         {
@@ -143,6 +146,13 @@ public class CreateKartyCommandHandler
             Article = article,
             MinScore = request.MinScore,
             MaxScore = request.MaxScore,
+            UnitSequence = karty.UnitId is int unitId
+                ? await _context.KartyUnits
+                    .Where(unit => unit.KartyUnitId == unitId)
+                    .Select(unit => (int?)unit.Sequence)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null,
+            UnitOrder = karty.UnitOrder,
             KartyUrl = imageKey,
             Updated = isUpdate,
         };
@@ -206,6 +216,75 @@ public class CreateKartyCommandHandler
             response.Warning =
                 $"Telaffuz üretilemedi ({exception.Message}). Kart kullanılabilir; " +
                 "Hangfire'daki KartyAudioSyncJob sonraki turunda tamamlayacak.";
+        }
+    }
+
+    /// <summary>
+    /// Kartı Karty Yolu'nda bir üniteye yerleştirir: yeni kelime ünite
+    /// sırasıyla geldiği için ünitesiz kart oyunda hiç yeni kelime olarak
+    /// çıkmaz.
+    ///
+    /// Ünite verilmezse kart, **aynı puan bandındaki** kartların ünitesine
+    /// gider (geçiş döneminde bantlar ünite oldu); öyle bir ünite yoksa
+    /// sonuncuya. Güncellemede ünite verilmezse yeri değişmez. Hiç ünite
+    /// tanımlanmamışsa kart ünitesiz kalır ve seçici eski bant davranışını
+    /// sürdürür.
+    /// </summary>
+    private async Task PlaceInUnitAsync(
+        KartyModel karty,
+        CreateKartyRequest request,
+        bool isUpdate,
+        CancellationToken cancellationToken)
+    {
+        int? unitId;
+        if (request.UnitSequence is int sequence)
+        {
+            unitId = await _context.KartyUnits
+                .Where(unit => unit.Sequence == sequence)
+                .Select(unit => (int?)unit.KartyUnitId)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (unitId is null)
+            {
+                var problem = $"{sequence}. ünite yok; önce admin/units/{sequence} ile açılmalı.";
+                throw new LingualLoopException(
+                    ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
+                    ErrorCode.KartyPayloadInvalid.GetDescription(problem),
+                    HttpStatusCode.BadRequest);
+            }
+        }
+        else if (isUpdate && karty.UnitId is not null)
+        {
+            if (request.UnitOrder is int order) karty.UnitOrder = order;
+            return;
+        }
+        else
+        {
+            unitId = await _context.Karty
+                         .Where(item => item.MinScore == request.MinScore && item.UnitId != null)
+                         .GroupBy(item => item.UnitId)
+                         .OrderByDescending(group => group.Count())
+                         .Select(group => group.Key)
+                         .FirstOrDefaultAsync(cancellationToken)
+                     ?? await _context.KartyUnits
+                         .OrderByDescending(unit => unit.Sequence)
+                         .Select(unit => (int?)unit.KartyUnitId)
+                         .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        if (unitId is null) return;
+
+        var movedToNewUnit = karty.UnitId != unitId;
+        karty.UnitId = unitId;
+        if (request.UnitOrder is int requestedOrder)
+        {
+            karty.UnitOrder = requestedOrder;
+        }
+        else if (movedToNewUnit || karty.UnitOrder is null)
+        {
+            var lastOrder = await _context.Karty
+                .Where(item => item.UnitId == unitId && item.KartyId != karty.KartyId)
+                .MaxAsync(item => item.UnitOrder, cancellationToken);
+            karty.UnitOrder = (lastOrder ?? 0) + 1;
         }
     }
 

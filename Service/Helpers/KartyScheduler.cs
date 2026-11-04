@@ -34,7 +34,16 @@ namespace Service.Helpers;
 /// içinden rastgele yapılıyor.
 ///
 /// Sınıf sorguları yapar, **kuralları bilmez**: aralıklar ve tavan
-/// <see cref="KartyLeitner"/>, gün sınırı <see cref="IstanbulDay"/> içinde.
+/// <see cref="KartyLeitner"/>, gün sınırı <see cref="IstanbulDay"/>, ünite
+/// kapısı <see cref="KartyUnitRules"/> içinde.
+///
+/// ## Puan bandı artık kart süzmüyor (Karty Yolu, 4 Kasım 2026)
+///
+/// Yeni kelime ünite sırasıyla geliyor, sıradaki ünite öğrenmeyle açılıyor.
+/// Tekrar, test ve pratik aşamaları kullanıcının tanıştığı **bütün**
+/// kelimelerden seçiyor: puan yanlışta düştüğü için bant, vadesi gelmiş
+/// tekrarları gizleyebiliyordu. <c>userScore</c> yalnız hiç ünite
+/// tanımlanmamış (boş) veritabanında eski davranış için kullanılıyor.
 /// </summary>
 public static class KartyScheduler
 {
@@ -59,7 +68,14 @@ public static class KartyScheduler
     private const int IntroductionBuffer = 2;
 
     /// <summary>
-    /// Seçilen kartın kimliği; puan bandında hiç kart yoksa <c>null</c>.
+    /// Yeni kelime penceresinin alt sınırı: istemcinin destesi (3) + önden
+    /// çekilen kart (1). Pencere bundan dar olursa istemci aynı kartı tekrar
+    /// tekrar alıp eler ve deste kurur (2. aşamadaki dersin aynısı).
+    /// </summary>
+    private const int NewWordWindowFloor = 4;
+
+    /// <summary>
+    /// Seçilen kartın kimliği; sunulacak hiç kart yoksa <c>null</c>.
     /// </summary>
     public static async Task<int?> SelectKartyIdAsync(
         LingualLoopContext context,
@@ -68,19 +84,13 @@ public static class KartyScheduler
         DateTime utcNow,
         CancellationToken cancellationToken)
     {
-        var bandKartyIds = context.Karty
-            .Where(karty => karty.MinScore <= userScore && karty.MaxScore >= userScore)
-            .Select(karty => karty.KartyId);
-
-        var learningInBand = context.UserKartyLearnings
-            .Where(learning =>
-                learning.UserId == userId &&
-                bandKartyIds.Contains(learning.KartyId));
+        var learnings = context.UserKartyLearnings
+            .Where(learning => learning.UserId == userId);
 
         // 1 — Vadesi gelmiş tekrar. En geç kalmışlar önce gelsin ki borç
         // birikmesin; seçim o pencere içinden rastgele.
-        var dueIds = await learningInBand
-            .Where(learning => learning.Box > 0 && learning.DueDate <= utcNow)
+        var dueIds = await learnings
+            .Where(KartyLeitner.DueForReview(utcNow))
             .OrderBy(learning => learning.DueDate)
             .Take(CandidateWindow)
             .Select(learning => learning.KartyId)
@@ -104,7 +114,7 @@ public static class KartyScheduler
         // aşağı düşüyordu. Akış o yüzden "4 tanışma, sonra 4 pratik" diye
         // kümeleniyordu. Deterministik sorgu bu dosyada üçüncü kez sorun
         // çıkardı — **aşamaların hiçbiri tek bir kart döndürmemeli.**
-        var untestedIds = await learningInBand
+        var untestedIds = await learnings
             .Where(learning => learning.Box == 0)
             .OrderBy(learning => learning.IntroducedDate)
             .Take(CandidateWindow)
@@ -128,14 +138,19 @@ public static class KartyScheduler
 
         if (introducedToday < KartyLeitner.DailyNewWordLimit)
         {
-            var newKartyId = await context.Karty
-                .Where(karty =>
-                    karty.MinScore <= userScore &&
-                    karty.MaxScore >= userScore &&
-                    !seenKartyIds.Contains(karty.KartyId))
-                .OrderBy(karty => EF.Functions.Random())
-                .Select(karty => (int?)karty.KartyId)
-                .FirstOrDefaultAsync(cancellationToken);
+            var units = await KartyUnitProgressReader.ReadAsync(
+                context, userId, cancellationToken);
+            var newKartyId = units.Count > 0
+                ? await NextNewKartyIdAsync(
+                    context, units, seenKartyIds, introducedToday, cancellationToken)
+                : await context.Karty
+                    .Where(karty =>
+                        karty.MinScore <= userScore &&
+                        karty.MaxScore >= userScore &&
+                        !seenKartyIds.Contains(karty.KartyId))
+                    .OrderBy(karty => EF.Functions.Random())
+                    .Select(karty => (int?)karty.KartyId)
+                    .FirstOrDefaultAsync(cancellationToken);
             if (newKartyId is not null) return newKartyId;
         }
 
@@ -146,7 +161,7 @@ public static class KartyScheduler
         // `Box = 0` ile kaydedildiği için havuza hiç girmiyor, yani yeni
         // tanışılan kelime soru olarak asla geri gelmiyordu. Tanışmış ama
         // henüz cevaplanmamış kelime, pratiğe **en çok** ihtiyacı olandır.
-        var practiceIds = await learningInBand
+        var practiceIds = await learnings
             .Select(learning => learning.KartyId)
             .ToListAsync(cancellationToken);
         if (practiceIds.Count > 0) return PickRandom(practiceIds);
@@ -160,6 +175,41 @@ public static class KartyScheduler
             .OrderBy(karty => EF.Functions.Random())
             .Select(karty => (int?)karty.KartyId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Ünite sırasındaki yeni kelime: görülmemiş kelimesi kalan ilk ünite,
+    /// açıksa onun sıradaki kelimeleri. Kilitliyse yeni kelime yok; kullanıcı
+    /// tekrar ve pratikle devam eder, ünite pekişince açılır.
+    ///
+    /// Seçim tek karta kilitlenmez: sıradaki <c>kalan kota</c> kadar kelime
+    /// (en az <see cref="NewWordWindowFloor"/>) içinden rastgele. Böylece
+    /// bugün tanışılanlar yine sıradaki grup olur — patikadaki "Yarın"
+    /// doğru kalır — ama istemcinin destesi kurumaz.
+    /// </summary>
+    private static async Task<int?> NextNewKartyIdAsync(
+        LingualLoopContext context,
+        IReadOnlyList<KartyUnitSnapshot> units,
+        IQueryable<int> seenKartyIds,
+        int introducedToday,
+        CancellationToken cancellationToken)
+    {
+        var current = units.FirstOrDefault(unit => unit.HasUnseen);
+        if (current is null || !current.Unlocked) return null;
+
+        var window = Math.Max(
+            KartyLeitner.DailyNewWordLimit - introducedToday,
+            NewWordWindowFloor);
+        var candidates = await context.Karty
+            .Where(karty =>
+                karty.UnitId == current.Unit.KartyUnitId &&
+                !seenKartyIds.Contains(karty.KartyId))
+            .OrderBy(karty => karty.UnitOrder ?? int.MaxValue)
+            .ThenBy(karty => karty.KartyId)
+            .Take(window)
+            .Select(karty => karty.KartyId)
+            .ToListAsync(cancellationToken);
+        return candidates.Count > 0 ? PickRandom(candidates) : null;
     }
 
     private static int PickRandom(IReadOnlyList<int> ids) =>

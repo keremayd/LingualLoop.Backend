@@ -27,6 +27,16 @@ public class CreateKartyRequest : IRequest<CreateKartyResponse>
 
     public int MaxScore { get; set; }
 
+    /// <summary>
+    /// Karty Yolu ünitesi (sırası: 1, 2, …). Verilmezse kart, aynı puan
+    /// bandındaki kartların ünitesine eklenir; öyle bir ünite yoksa sonuncuya.
+    /// Güncellemede verilmezse kartın ünitesi değişmez.
+    /// </summary>
+    public int? UnitSequence { get; set; }
+
+    /// <summary>Ünite içindeki sıra. Verilmezse ünitenin sonuna eklenir.</summary>
+    public int? UnitOrder { get; set; }
+
     public byte[] ImageContent { get; set; } = Array.Empty<byte>();
 
     /// <summary>Uzantı çıkarmak için; içerik türü buradan türetiliyor.</summary>

@@ -30,10 +30,6 @@ public class GetWordCollectionQueryHandler
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
         var utcNow = DateTime.UtcNow;
-        var score = await _context.UserScores.AsNoTracking()
-            .Where(item => item.UserId == request.UserId)
-            .Select(item => (int?)item.Score)
-            .FirstOrDefaultAsync(cancellationToken);
 
         // Older rows can have a correct answer without an introduction date.
         // Both kinds represent a word the user has actually encountered.
@@ -42,9 +38,8 @@ public class GetWordCollectionQueryHandler
                            (item.IntroducedDate != null || item.CorrectCount > 0) &&
                            item.Karty != null);
 
-        var dueWords = words.Where(item =>
-            score != null && item.Box > 0 && item.DueDate <= utcNow &&
-            item.Karty!.MinScore <= score && item.Karty.MaxScore >= score);
+        // Seçicinin ve ana ekran sayacının tanımı (KartyLeitner.DueForReview).
+        var dueWords = words.Where(KartyLeitner.DueForReview(utcNow));
         var articleWords = words.Where(item =>
             item.CorrectCount > 0 && item.ArticleCorrectCount < ArticleLearningGoal);
 
@@ -82,8 +77,9 @@ public class GetWordCollectionQueryHandler
                 KartyUrl = item.Karty.KartyUrl,
                 AudioUrl = item.Karty.AudioUrl,
                 IsNew = item.CorrectCount == 0,
-                IsDue = score != null && item.Box > 0 && item.DueDate <= utcNow &&
-                        item.Karty.MinScore <= score && item.Karty.MaxScore >= score,
+                // KartyLeitner.DueForReview'ın SQL'e çevrilen hâli; projeksiyon
+                // içinde ifade ağacı kullanılamıyor.
+                IsDue = item.Box > 0 && item.DueDate <= utcNow,
                 NeedsArticlePractice = item.CorrectCount > 0 &&
                                        item.ArticleCorrectCount < ArticleLearningGoal,
             })
