@@ -94,6 +94,22 @@ public class KartyController : ControllerBase
         return Ok(new ApiResponse<GetKartyPathResponse> { Data = response });
     }
 
+    /// <summary>
+    /// Ünite açılış kutlaması görüldü; patika onu bir daha göstermez. Yalnız
+    /// token sahibi.
+    /// </summary>
+    [Authorize]
+    [HttpPost("path/{userId}/unlock/acknowledge")]
+    public async Task<ActionResult<ApiResponse<AcknowledgeKartyUnitUnlockResponse>>> AcknowledgeUnitUnlock(
+        [FromRoute] string userId)
+    {
+        if (!string.Equals(User.Identity?.Name, userId, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new AcknowledgeKartyUnitUnlockRequest { UserId = userId });
+        return Ok(new ApiResponse<AcknowledgeKartyUnitUnlockResponse> { Data = response });
+    }
+
     [Authorize]
     [HttpGet("wrong/random/{userId}")]
     public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomWrongKartyByUserId([FromRoute] string userId)

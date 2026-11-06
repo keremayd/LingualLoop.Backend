@@ -4,8 +4,9 @@ using Postgres;
 namespace Service.Helpers;
 
 /// <summary>
-/// <c>karty_unit</c> tablosunu ve <c>karty.unit_id</c> / <c>karty.unit_order</c>
-/// kolonlarını garanti eder.
+/// <c>karty_unit</c> tablosunu, <c>karty.unit_id</c> / <c>karty.unit_order</c>
+/// kolonlarını ve kullanıcının açtığı ünitelerin kaydını
+/// (<c>user_karty_unit_state</c>) garanti eder.
 ///
 /// Depodaki desen (<see cref="KartyAudioSchemaHelper"/>): idempotent DDL,
 /// **veriye dokunmaz**. Mevcut kartların ünitelere atanması bir kerelik
@@ -51,6 +52,13 @@ public static class KartyUnitSchemaHelper
 
                 CREATE INDEX IF NOT EXISTS ix_karty_unit_id_unit_order
                     ON karty (unit_id, unit_order);
+
+                CREATE TABLE IF NOT EXISTS user_karty_unit_state (
+                    user_id text PRIMARY KEY REFERENCES "AspNetUsers"("Id") ON DELETE CASCADE,
+                    unlocked_sequence integer NOT NULL,
+                    announced_sequence integer NOT NULL,
+                    updated_at timestamp with time zone NOT NULL
+                );
                 """,
                 cancellationToken);
 

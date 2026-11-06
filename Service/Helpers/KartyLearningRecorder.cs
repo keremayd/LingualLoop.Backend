@@ -4,9 +4,16 @@ using Postgres.Models;
 
 namespace Service.Helpers;
 
+/// <summary>
+/// Doğru cevabın kaydı ve bu cevapla kelimenin pekişip pekişmediği
+/// (kutu <see cref="KartyUnitRules.ConsolidatedBox"/> eşiğini geçti mi).
+/// Pekişme, bir ünitenin hedefe ulaşabileceği tek an.
+/// </summary>
+public sealed record KartyLearningRecord(UserKartyLearning Learning, bool BecameConsolidated);
+
 public static class KartyLearningRecorder
 {
-    public static async Task<UserKartyLearning> RecordAsync(
+    public static async Task<KartyLearningRecord> RecordAsync(
         LingualLoopContext context,
         string userId,
         int kartyId,
@@ -30,9 +37,10 @@ public static class KartyLearningRecorder
                 LastCorrectDate = now,
             };
             context.UserKartyLearnings.Add(learning);
-            return learning;
+            return new KartyLearningRecord(learning, false);
         }
 
+        var wasConsolidated = KartyUnitRules.IsConsolidated(learning.Box);
         learning.CorrectCount += 1;
         learning.LastCorrectDate = now;
 
@@ -46,6 +54,8 @@ public static class KartyLearningRecorder
             learning.DueDate = KartyLeitner.NextDue(learning.Box, now);
         }
 
-        return learning;
+        return new KartyLearningRecord(
+            learning,
+            !wasConsolidated && KartyUnitRules.IsConsolidated(learning.Box));
     }
 }

@@ -18,6 +18,13 @@ public class GetKartyPathResponse
     /// <c>nextTicketAt</c>'teki saat dilimi hatasını tekrar ederdi.
     /// </summary>
     public DateTime TomorrowStartsAtUtc { get; set; }
+
+    /// <summary>
+    /// Açılıp kutlaması henüz gösterilmemiş ünitenin sırası; yoksa null.
+    /// İstemci patikaya dönünce kutlamayı gösterir ve
+    /// <c>path/{userId}/unlock/acknowledge</c> ile kapatır.
+    /// </summary>
+    public int? PendingUnlockSequence { get; set; }
 }
 
 public class KartyPathUnitResponse

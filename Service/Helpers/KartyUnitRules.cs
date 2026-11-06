@@ -37,24 +37,66 @@ public static class KartyUnitRules
     /// <summary>
     /// Ünitelerin açık olup olmadığı, <paramref name="units"/> sırasıyla.
     ///
-    /// Ünite 1 hep açık. Sonraki ünite iki yoldan açıktır: bir önceki açık
-    /// ünite hedefe ulaşmışsa **ya da** içinden en az bir kelimeyle
-    /// tanışılmışsa. İkinci şart kilidin geri kapanmasını önlüyor: yanlış
-    /// cevap kutuyu 1'e düşürünce önceki ünitenin oranı hedefin altına
-    /// inebilir, ama kullanıcı yeni üniteye çoktan başlamıştır. Tanışılan
-    /// kelime silinmediği için ayrı bir "açıldı" kaydı tutmak gerekmiyor.
+    /// Ünite 1 hep açık. Sonraki ünite üç yoldan açıktır: bir önceki açık
+    /// ünite hedefe ulaşmışsa, içinden en az bir kelimeyle tanışılmışsa ya da
+    /// açılması kaydedilmişse (<paramref name="recordedThroughIndex"/>,
+    /// <c>user_karty_unit_state</c>). Son ikisi kilidin geri kapanmasını
+    /// önlüyor: yanlış cevap kutuyu 1'e düşürünce önceki ünitenin oranı
+    /// hedefin altına inebilir. Kayıt olmasaydı yeni üniteden ilk kelime
+    /// gelene kadar geçen sürede ünite yeniden kilitlenirdi.
     /// </summary>
-    public static bool[] UnlockStates(IReadOnlyList<UnitProgress> units)
+    public static bool[] UnlockStates(
+        IReadOnlyList<UnitProgress> units,
+        int recordedThroughIndex = -1)
     {
         var unlocked = new bool[units.Count];
         for (var i = 0; i < units.Count; i++)
         {
             unlocked[i] = i == 0 ||
+                          i <= recordedThroughIndex ||
                           units[i].SeenCount > 0 ||
                           (unlocked[i - 1] && HasReachedGoal(units[i - 1]));
         }
 
         return unlocked;
+    }
+
+    /// <summary>
+    /// Kayıttaki ünite sırasının (<c>unlocked_sequence</c>) listedeki konumu:
+    /// sırası kayda eşit ya da küçük son ünite. Kayıt yoksa -1.
+    /// </summary>
+    public static int RecordedIndex(IReadOnlyList<int> sequences, int recordedSequence)
+    {
+        var index = -1;
+        for (var i = 0; i < sequences.Count; i++)
+        {
+            if (sequences[i] <= recordedSequence) index = i;
+        }
+
+        return index;
+    }
+
+    /// <summary>
+    /// Yeni açılan ünitelerin sıraları: açık, içinden hiç kelime görülmemiş
+    /// ve kaydın ötesinde. Kelimesi görülmüş ünite zaten açıktı (eski bant
+    /// döneminde tanışılanlar dahil); onun için kutlama gösterilmez.
+    /// </summary>
+    public static IReadOnlyList<int> NewlyUnlocked(
+        IReadOnlyList<int> sequences,
+        IReadOnlyList<UnitProgress> units,
+        IReadOnlyList<bool> unlocked,
+        int recordedSequence)
+    {
+        var newly = new List<int>();
+        for (var i = 1; i < units.Count; i++)
+        {
+            if (unlocked[i] && units[i].SeenCount == 0 && sequences[i] > recordedSequence)
+            {
+                newly.Add(sequences[i]);
+            }
+        }
+
+        return newly;
     }
 }
 

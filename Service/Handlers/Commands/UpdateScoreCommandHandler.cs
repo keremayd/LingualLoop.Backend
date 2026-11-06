@@ -81,14 +81,16 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
             leagueProgress.UpdatedAt = utcNow;
         }
 
+        var becameConsolidated = false;
         if (isCorrect && request.KartyId.HasValue)
         {
             await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
-            await KartyLearningRecorder.RecordAsync(
+            var record = await KartyLearningRecorder.RecordAsync(
                 _context,
                 request.UserId,
                 request.KartyId.Value,
                 cancellationToken);
+            becameConsolidated = record.BecameConsolidated;
         }
 
         // Karty'de verilen her cevap — doğru ya da yanlış — günü "oynandı"
@@ -98,6 +100,13 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
 
         _userScoreRepository.Update(userScore);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Kelime pekiştiyse bir ünite hedefe ulaşmış olabilir: açılma anı
+        // kaydedilir (ünite bir daha kilitlenmez, patika bir kez kutlar).
+        if (becameConsolidated)
+        {
+            await KartyUnitUnlockRecorder.CaptureAsync(_context, request.UserId, cancellationToken);
+        }
         
         return new UpdateScoreResponse()
         {

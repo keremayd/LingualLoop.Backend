@@ -69,13 +69,15 @@ public class ResolveWrongKartyReviewCommandHandler : IRequestHandler<ResolveWron
             history.ReviewedDate = null;
         }
 
+        var becameConsolidated = false;
         if (request.IsMastered)
         {
-            await KartyLearningRecorder.RecordAsync(
+            var record = await KartyLearningRecorder.RecordAsync(
                 _context,
                 request.UserId,
                 request.KartyId,
                 cancellationToken);
+            becameConsolidated = record.BecameConsolidated;
         }
 
         // Rövanş da öğrenmedir: verilen cevap günü "oynandı" yapar.
@@ -112,6 +114,12 @@ public class ResolveWrongKartyReviewCommandHandler : IRequestHandler<ResolveWron
 
         await _context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+
+        // Rövanş'ta pekişen kelime de bir üniteyi açabilir.
+        if (becameConsolidated)
+        {
+            await KartyUnitUnlockRecorder.CaptureAsync(_context, request.UserId, cancellationToken);
+        }
 
         return new ResolveWrongKartyReviewResponse
         {

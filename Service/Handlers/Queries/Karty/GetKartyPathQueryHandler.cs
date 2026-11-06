@@ -61,6 +61,24 @@ public class GetKartyPathQueryHandler
                 learning.FirstLearnedDate))
             .ToListAsync(cancellationToken);
 
-        return KartyPathBuilder.Build(units, cards, learnings, DateTime.UtcNow);
+        var unitState = await _context.UserKartyUnitStates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(state => state.UserId == request.UserId, cancellationToken);
+
+        var response = KartyPathBuilder.Build(
+            units,
+            cards,
+            learnings,
+            DateTime.UtcNow,
+            unitState?.UnlockedSequence ?? 0);
+
+        if (unitState is not null &&
+            unitState.UnlockedSequence > unitState.AnnouncedSequence &&
+            units.Any(unit => unit.Sequence == unitState.UnlockedSequence))
+        {
+            response.PendingUnlockSequence = unitState.UnlockedSequence;
+        }
+
+        return response;
     }
 }

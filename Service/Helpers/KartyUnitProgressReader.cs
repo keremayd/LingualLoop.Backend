@@ -56,7 +56,14 @@ public static class KartyUnitProgressReader
                     row?.Consolidated ?? 0);
             })
             .ToList();
-        var unlocked = KartyUnitRules.UnlockStates(progress);
+        var recorded = await context.UserKartyUnitStates
+            .AsNoTracking()
+            .Where(state => state.UserId == userId)
+            .Select(state => (int?)state.UnlockedSequence)
+            .FirstOrDefaultAsync(cancellationToken) ?? 0;
+        var unlocked = KartyUnitRules.UnlockStates(
+            progress,
+            KartyUnitRules.RecordedIndex(units.Select(unit => unit.Sequence).ToList(), recorded));
 
         return units
             .Select((unit, i) => new KartyUnitSnapshot(unit, progress[i], unlocked[i]))

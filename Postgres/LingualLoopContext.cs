@@ -27,6 +27,7 @@ public class LingualLoopContext : IdentityDbContext<User>
     public DbSet<UserVideo> UserVideos { get; set; }
     public DbSet<Karty> Karty { get; set; }
     public DbSet<KartyUnit> KartyUnits { get; set; }
+    public DbSet<UserKartyUnitState> UserKartyUnitStates { get; set; }
     public DbSet<UserKartyHistory> UserKartyHistories { get; set; }
     public DbSet<UserKartyLearning> UserKartyLearnings { get; set; }
     public DbSet<UserDailyActivity> UserDailyActivities { get; set; }

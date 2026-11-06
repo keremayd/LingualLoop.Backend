@@ -34,7 +34,8 @@ public static class KartyPathBuilder
         IReadOnlyList<PathUnit> units,
         IReadOnlyList<PathCard> cards,
         IReadOnlyList<PathLearning> learnings,
-        DateTime utcNow)
+        DateTime utcNow,
+        int recordedUnlockSequence = 0)
     {
         var limit = KartyLeitner.DailyNewWordLimit;
         var (todayStartUtc, todayEndUtc) = IstanbulDay.UtcRangeOf(utcNow);
@@ -61,7 +62,13 @@ public static class KartyPathBuilder
                     seen.Count(card => KartyUnitRules.IsConsolidated(learningById[card.KartyId].Box)));
             })
             .ToList();
-        var unlocked = KartyUnitRules.UnlockStates(progress);
+        // Kelime seçiciyle aynı kural ve aynı kayıt: "hangi ünite açık" iki
+        // yerde farklı hesaplanmasın.
+        var unlocked = KartyUnitRules.UnlockStates(
+            progress,
+            KartyUnitRules.RecordedIndex(
+                units.Select(unit => unit.Sequence).ToList(),
+                recordedUnlockSequence));
 
         var introducedToday = learnings.Count(item =>
             item.IntroducedDate >= todayStartUtc && item.IntroducedDate < todayEndUtc);
