@@ -1,23 +1,16 @@
 namespace Service.DataTransferObjects.Responses.Karty;
 
 /// <summary>
-/// Karty Yolu: üniteler ve her ünitenin adımları. Bir adım, 8 yeni
-/// kelimelik bir deste; her gün oynayan kullanıcıda bir güne denk gelir.
+/// Karty Yolu: üniteler ve her ünitenin adımları. Bir adım bir deste:
+/// ünitenin kelimeleri ünite sırasıyla 8'erli bölünür (<c>KartyDeckRules</c>).
 /// Görsel alanları S3 anahtarıdır, controller imzalı adrese çevirir.
 /// </summary>
 public class GetKartyPathResponse
 {
     public List<KartyPathUnitResponse> Units { get; set; } = new();
 
-    /// <summary>Günlük yeni kelime tavanı (bugünün halkasındaki parça sayısı).</summary>
-    public int DailyNewWordLimit { get; set; }
-
-    /// <summary>
-    /// Yarının (İstanbul günü) başladığı an, UTC. Yarının penceresindeki geri
-    /// sayım istemcide bundan hesaplanır; yerel saatle hesaplamak
-    /// <c>nextTicketAt</c>'teki saat dilimi hatasını tekrar ederdi.
-    /// </summary>
-    public DateTime TomorrowStartsAtUtc { get; set; }
+    /// <summary>Bir destedeki kelime sayısı (şu anki destenin halkasındaki parça sayısı).</summary>
+    public int DeckSize { get; set; }
 
     /// <summary>
     /// Açılıp kutlaması henüz gösterilmemiş ünitenin sırası; yoksa null.
@@ -47,27 +40,31 @@ public class KartyPathUnitResponse
 
 public class KartyPathStepResponse
 {
-    /// <summary><c>done</c> · <c>today</c> · <c>tomorrow</c> · <c>upcoming</c> · <c>locked</c>.</summary>
+    /// <summary><c>done</c> · <c>current</c> · <c>upcoming</c> · <c>locked</c>.</summary>
     public string State { get; set; } = string.Empty;
 
-    /// <summary>Geçmiş günün ve bugünün İstanbul tarihi: <c>2026-11-02</c>.</summary>
-    public string? Day { get; set; }
+    /// <summary>
+    /// Ünite içindeki deste numarası (1'den). Açık bütün desteler bittiğinde
+    /// eklenen yalnız tekrar adımında null.
+    /// </summary>
+    public int? Deck { get; set; }
 
-    /// <summary>Bu destede tanışılan yeni kelime.</summary>
+    /// <summary>Bu destede tanışılan kelime.</summary>
     public int NewCount { get; set; }
 
-    /// <summary>Destenin büyüklüğü; bugün için günün hedefi.</summary>
+    /// <summary>Destenin büyüklüğü.</summary>
     public int NewGoal { get; set; }
 
-    /// <summary>Bugün ve yarın yapılacak tekrar sayısı.</summary>
+    /// <summary>Şu anki adımda: bütün ünitelerden vadesi gelmiş tekrar.</summary>
     public int ReviewCount { get; set; }
 
-    /// <summary>Bu destede tekrar vakti gelmiş kelime (geçmiş düğümün rozeti).</summary>
+    /// <summary>Bu destede tekrar vakti gelmiş kelime (bitmiş düğümün rozeti).</summary>
     public int DueCount { get; set; }
 
+    /// <summary>Destenin tanışılmış kelimeleri, deste sırasıyla.</summary>
     public List<KartyPathWordResponse> Words { get; set; } = new();
 
-    /// <summary>Yarının kelimelerinin görselleri; istemci siluet olarak çizer.</summary>
+    /// <summary>Destenin henüz tanışılmamış kelimelerinin görselleri; istemci silüet çizer.</summary>
     public List<string> UpcomingImageUrls { get; set; } = new();
 }
 

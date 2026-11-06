@@ -14,6 +14,12 @@ public class GetKartyByScoreResponse
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public KartyCardMode Mode { get; set; } = KartyCardMode.Spelling;
+
+    /// <summary>
+    /// Kartın geldiği aşama: <c>review</c> · <c>test</c> · <c>new</c> ·
+    /// <c>practice</c>. İstemci oyundaki tekrar sayısını bununla tutar.
+    /// </summary>
+    public string Stage { get; set; } = "new";
     public string QuestionText { get; set; } = string.Empty;
     public string CorrectText { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;

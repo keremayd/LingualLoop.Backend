@@ -33,11 +33,28 @@ public class KartyController : ControllerBase
         _adminOptions = adminOptions.Value;
     }
 
+    /// <summary>
+    /// Sıradaki kart. <paramref name="unit"/> ve <paramref name="deck"/>
+    /// oyunun adımı (patikadaki şu anki deste; deste yoksa yalnız tekrar):
+    /// yeni kelime yalnız o desteden gelir. <paramref name="reviews"/> oyunda
+    /// şimdiye kadar verilen tekrar kartı sayısı; tekrarlar oyunun payı kadar,
+    /// yeni kelimelerle karışık gelir (<c>KartyScheduler</c>).
+    /// </summary>
     [Authorize]
     [HttpGet("random/{userId}")]
-    public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomQuestionByUserId([FromRoute] string userId)
+    public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomQuestionByUserId(
+        [FromRoute] string userId,
+        [FromQuery] int? unit,
+        [FromQuery] int? deck,
+        [FromQuery] int? reviews)
     {
-        var kartyQuestion = await _mediator.Send(new GetKartyByScoreRequest() { UserId = userId });
+        var kartyQuestion = await _mediator.Send(new GetKartyByScoreRequest()
+        {
+            UserId = userId,
+            UnitSequence = unit,
+            Deck = deck,
+            Reviews = reviews,
+        });
 
         // Yanıt **yeniden kurulmuyor**, yalnız imzalı URL yazılıyor.
         //
@@ -60,8 +77,8 @@ public class KartyController : ControllerBase
     }
 
     /// <summary>
-    /// Karty Yolu: üniteler, geçmiş günler, bugün, yarın ve kilitli
-    /// üniteler. Yalnız token sahibi kendi yolunu okuyabilir.
+    /// Karty Yolu: üniteler ve desteleri (bitmiş, şu anki, sıradaki,
+    /// kilitli). Yalnız token sahibi kendi yolunu okuyabilir.
     /// </summary>
     [Authorize]
     [HttpGet("path/{userId}")]
@@ -92,6 +109,38 @@ public class KartyController : ControllerBase
         }
 
         return Ok(new ApiResponse<GetKartyPathResponse> { Data = response });
+    }
+
+    /// <summary>
+    /// Oyunun durumu: destesi bitti mi, tekrar payı doldu mu
+    /// (<paramref name="reviews"/> = oyunda cevaplanan tekrar). Oyun her
+    /// cevaptan sonra sorar; bitince özeti gösterir. Yalnız token sahibi.
+    /// </summary>
+    [Authorize]
+    [HttpGet("session/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetKartySessionStatusResponse>>> GetSessionStatus(
+        [FromRoute] string userId,
+        [FromQuery] int unit,
+        [FromQuery] int? deck,
+        [FromQuery] int reviews = 0)
+    {
+        if (!string.Equals(User.Identity?.Name, userId, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new GetKartySessionStatusRequest
+        {
+            UserId = userId,
+            UnitSequence = unit,
+            Deck = deck,
+            ReviewsAnswered = Math.Max(0, reviews),
+        });
+        foreach (var word in response.Words)
+        {
+            if (!string.IsNullOrEmpty(word.KartyUrl))
+                word.KartyUrl = _amazonService.GeneratePreSignedUrl(word.KartyUrl, BucketType.KartyAssets);
+        }
+
+        return Ok(new ApiResponse<GetKartySessionStatusResponse> { Data = response });
     }
 
     /// <summary>

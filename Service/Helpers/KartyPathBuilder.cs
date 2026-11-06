@@ -4,29 +4,28 @@ namespace Service.Helpers;
 
 /// <summary>
 /// Karty Yolu'nun adımlarını kurar. Saf: veritabanı bilmez, saati parametre
-/// alır; bu yüzden gün sınırında ve ünite geçişinde elle sınanabilir.
+/// alır; bu yüzden elle sınanabilir.
 ///
 /// ## Adım ne demek
 ///
-/// Bir adım 8 yeni kelimelik bir deste (<see cref="KartyLeitner.DailyNewWordLimit"/>).
-/// Geçmiş adımlar kelimelerin **tanışıldığı güne** göre gruplanır — kullanıcı
-/// "geçmiş günlerdeki adımlarımı" görmek istiyor, deste sınırlarını değil.
-/// Gelecek adımlar ise sıradaki kelimelerin plana dökülmüş hâli:
+/// Bir adım bir deste (<see cref="KartyDeckRules"/>): ünitenin kelimeleri
+/// ünite sırasıyla 8'erli bölünür. Adımlar günlere göre değil, içeriğe göre
+/// kurulur — patika takvim değil, yürünen bir yol.
 ///
 /// <code>
-/// görülmemiş kelimeler (ünite sırasıyla)
-///   ├─ bugünün kalan kotası     → bugünün düğümü (halkanın boş parçaları)
-///   ├─ sonraki 8                → yarın
-///   └─ kalanlar 8'er            → sonrası
+/// açık ünite
+///   ├─ bitmiş desteler      → done      (her kelimesi en az bir kez doğru)
+///   ├─ ilk bitmemiş deste   → current   (DEVAM balonu, kelime halkası)
+///   └─ sonraki desteler     → upcoming  (kelimeleri silüet)
+/// kilitli ünite              → locked
 /// </code>
 ///
-/// Bugünün kotası yalnız **güncel** ünitede kullanılır; ünite bugün biterse
-/// sıradaki ünite yarından başlar. Kilitli ünite plana girmez: kelime seçici
-/// (<see cref="KartyScheduler"/>) oradan kelime vermiyor.
-///
-/// Yeni kelime yoksa (ünite kapısı kapalı ya da içerik bitti) bugünün ve
-/// yarının düğümü yine çizilir, yalnız tekrarlarla: DEVAM her zaman bir yere
-/// bağlı kalır.
+/// Açık ünitelerde bitmemiş deste kalmadıysa (ünite kapısı kapalı ya da
+/// içerik bitti) son açık ünitenin sonuna yalnız tekrardan oluşan bir
+/// <c>current</c> adım eklenir: DEVAM her zaman bir yere bağlı kalır.
+/// Vadesi gelmiş tekrarlar bütün ünitelerden sayılır; <c>current</c> adıma
+/// oyunun soracağı kadarı yazılır (<see cref="KartyDeckRules.ReviewQuota"/>),
+/// tekrarlar yeni kelimelerle karışık gelir, kalanı sonraki oyunlara kalır.
 /// </summary>
 public static class KartyPathBuilder
 {
@@ -37,11 +36,6 @@ public static class KartyPathBuilder
         DateTime utcNow,
         int recordedUnlockSequence = 0)
     {
-        var limit = KartyLeitner.DailyNewWordLimit;
-        var (todayStartUtc, todayEndUtc) = IstanbulDay.UtcRangeOf(utcNow);
-        var tomorrowEndUtc = todayEndUtc.AddDays(1);
-        var today = IstanbulDay.DateOf(utcNow);
-
         var learningById = learnings.ToDictionary(item => item.KartyId);
         var cardsByUnit = units.ToDictionary(
             unit => unit.UnitId,
@@ -69,22 +63,11 @@ public static class KartyPathBuilder
             KartyUnitRules.RecordedIndex(
                 units.Select(unit => unit.Sequence).ToList(),
                 recordedUnlockSequence));
-
-        var introducedToday = learnings.Count(item =>
-            item.IntroducedDate >= todayStartUtc && item.IntroducedDate < todayEndUtc);
-        var remainingToday = Math.Max(0, limit - introducedToday);
-        var reviewsToday = learnings.Count(item =>
+        var reviews = learnings.Count(item =>
             KartyLeitner.IsDueForReview(item.Box, item.DueDate, utcNow));
-        var reviewsTomorrow = learnings.Count(item =>
-            item.Box > 0 && item.DueDate > utcNow && item.DueDate < tomorrowEndUtc);
 
-        var plan = PlanUnseen(units, cardsByUnit, learningById, progress, unlocked, remainingToday, limit);
-
-        var response = new GetKartyPathResponse
-        {
-            DailyNewWordLimit = limit,
-            TomorrowStartsAtUtc = todayEndUtc,
-        };
+        var response = new GetKartyPathResponse { DeckSize = KartyDeckRules.Size };
+        KartyPathStepResponse? current = null;
 
         for (var i = 0; i < units.Count; i++)
         {
@@ -104,174 +87,79 @@ public static class KartyPathBuilder
             };
             response.Units.Add(unitResponse);
 
-            if (!unlocked[i])
+            var decks = KartyDeckRules.Split(unitCards);
+            for (var d = 0; d < decks.Count; d++)
             {
-                // Kilitli ünite: içeriği belli değil, yalnız kaç deste olduğu.
-                for (var left = unitCards.Count; left > 0; left -= limit)
+                var deck = decks[d];
+                if (!unlocked[i])
                 {
+                    // Kilitli ünite: kelimeleri gösterilmez, yalnız kaç deste olduğu.
                     unitResponse.Steps.Add(new KartyPathStepResponse
                     {
                         State = "locked",
-                        NewGoal = Math.Min(limit, left),
+                        Deck = d + 1,
+                        NewGoal = deck.Count,
                     });
+                    continue;
                 }
-                continue;
-            }
 
-            // Geçmiş günler (ve bugün tanışılanlar), tanışma gününe göre.
-            var byDay = unitCards
-                .Where(card => learningById.ContainsKey(card.KartyId))
-                .GroupBy(card => DayOf(learningById[card.KartyId]))
-                .OrderBy(group => group.Key);
-            foreach (var group in byDay)
-            {
-                var words = group
-                    .OrderBy(card => learningById[card.KartyId].IntroducedDate
-                                     ?? learningById[card.KartyId].FirstLearnedDate)
-                    .Select(card => ToWord(card, learningById[card.KartyId], utcNow))
-                    .ToList();
-                unitResponse.Steps.Add(new KartyPathStepResponse
+                var seen = deck.Where(card => learningById.ContainsKey(card.KartyId)).ToList();
+                var tested = seen.Count(card => learningById[card.KartyId].Box >= 1);
+                var state = KartyDeckRules.IsComplete(deck.Count, tested)
+                    ? "done"
+                    : current is null ? "current" : "upcoming";
+                var step = new KartyPathStepResponse
                 {
-                    State = group.Key == today ? "today" : "done",
-                    Day = group.Key.ToString("yyyy-MM-dd"),
-                    NewCount = words.Count,
-                    NewGoal = words.Count,
-                    DueCount = words.Count(word => word.IsDue),
-                    Words = words,
-                });
-            }
-
-            // Plana dökülmüş görülmemiş kelimeler: bugün, yarın, sonrası.
-            var planned = unitCards
-                .Where(card => plan.ContainsKey(card.KartyId))
-                .GroupBy(card => plan[card.KartyId])
-                .OrderBy(group => group.Key);
-            foreach (var group in planned)
-            {
-                var count = group.Count();
-                if (group.Key == 0)
-                {
-                    var todayStep = unitResponse.Steps.LastOrDefault(step => step.State == "today");
-                    if (todayStep is null)
-                    {
-                        unitResponse.Steps.Add(new KartyPathStepResponse
-                        {
-                            State = "today",
-                            Day = today.ToString("yyyy-MM-dd"),
-                            NewGoal = count,
-                        });
-                    }
-                    else
-                    {
-                        todayStep.NewGoal += count;
-                    }
-                }
-                else
-                {
-                    unitResponse.Steps.Add(new KartyPathStepResponse
-                    {
-                        State = group.Key == 1 ? "tomorrow" : "upcoming",
-                        NewGoal = count,
-                        UpcomingImageUrls = group.Key == 1
-                            ? group.Select(card => card.KartyUrl).ToList()
-                            : new List<string>(),
-                    });
-                }
+                    State = state,
+                    Deck = d + 1,
+                    NewCount = seen.Count,
+                    NewGoal = deck.Count,
+                    DueCount = seen.Count(card => KartyLeitner.IsDueForReview(
+                        learningById[card.KartyId].Box,
+                        learningById[card.KartyId].DueDate,
+                        utcNow)),
+                    Words = seen
+                        .Select(card => ToWord(card, learningById[card.KartyId], utcNow))
+                        .ToList(),
+                    UpcomingImageUrls = deck
+                        .Where(card => !learningById.ContainsKey(card.KartyId))
+                        .Select(card => card.KartyUrl)
+                        .ToList(),
+                };
+                if (state == "current") current = step;
+                unitResponse.Steps.Add(step);
             }
         }
 
-        PlaceTodayAndTomorrow(response, reviewsToday, reviewsTomorrow, today);
+        if (current is null)
+        {
+            // Açık bütün desteler bitti: sıradaki adım yalnız tekrar.
+            var host = response.Units.LastOrDefault(unit => unit.State != "locked");
+            if (host is not null)
+            {
+                current = new KartyPathStepResponse { State = "current" };
+                host.Steps.Add(current);
+            }
+        }
+        if (current is not null)
+        {
+            current.ReviewCount = Math.Min(
+                reviews,
+                KartyDeckRules.ReviewQuota(deckGame: current.Deck is not null));
+        }
+
         AssignUnitStates(response);
         return response;
     }
 
-    /// <summary>Görülmemiş kelimeye gün atar: 0 = bugün, 1 = yarın, 2+ = sonrası.</summary>
-    private static Dictionary<int, int> PlanUnseen(
-        IReadOnlyList<PathUnit> units,
-        IReadOnlyDictionary<int, List<PathCard>> cardsByUnit,
-        IReadOnlyDictionary<int, PathLearning> learningById,
-        IReadOnlyList<UnitProgress> progress,
-        IReadOnlyList<bool> unlocked,
-        int remainingToday,
-        int limit)
-    {
-        var plan = new Dictionary<int, int>();
-        var current = -1;
-        for (var i = 0; i < units.Count; i++)
-        {
-            if (progress[i].SeenCount < progress[i].WordCount)
-            {
-                current = i;
-                break;
-            }
-        }
-        if (current < 0) return plan;
-
-        var slot = 0;
-        for (var i = current; i < units.Count && unlocked[i]; i++)
-        {
-            foreach (var card in cardsByUnit[units[i].UnitId])
-            {
-                if (learningById.ContainsKey(card.KartyId)) continue;
-                plan[card.KartyId] = slot < remainingToday ? 0 : 1 + (slot - remainingToday) / limit;
-                slot++;
-            }
-            // Bugünün kotası güncel üniteyle sınırlı.
-            if (i == current) slot = Math.Max(slot, remainingToday);
-        }
-
-        return plan;
-    }
-
     /// <summary>
-    /// Bugünün ve yarının düğümü her zaman var: yeni kelime yoksa yalnız
-    /// tekrarla, açık son ünitenin sonunda (kapısından önce).
-    /// </summary>
-    private static void PlaceTodayAndTomorrow(
-        GetKartyPathResponse response,
-        int reviewsToday,
-        int reviewsTomorrow,
-        DateOnly today)
-    {
-        var steps = response.Units.SelectMany(unit => unit.Steps).ToList();
-        var host = response.Units.LastOrDefault(unit => unit.State != "locked");
-        if (host is null) return;
-
-        // Ünite bugün bitip sıradakine bugün başlandıysa iki "bugün" grubu
-        // oluşur; bugünün düğümü yenisidir, öncekinin günü tamamlanmış sayılır.
-        var todaySteps = steps.Where(step => step.State == "today").ToList();
-        foreach (var earlier in todaySteps.SkipLast(1)) earlier.State = "done";
-
-        var todayStep = todaySteps.LastOrDefault();
-        if (todayStep is null)
-        {
-            todayStep = new KartyPathStepResponse
-            {
-                State = "today",
-                Day = today.ToString("yyyy-MM-dd"),
-            };
-            host.Steps.Add(todayStep);
-        }
-        todayStep.ReviewCount = reviewsToday;
-
-        var tomorrowStep = steps.FirstOrDefault(step => step.State == "tomorrow");
-        if (tomorrowStep is null)
-        {
-            tomorrowStep = new KartyPathStepResponse { State = "tomorrow" };
-            var todayHost = response.Units.First(unit => unit.Steps.Contains(todayStep));
-            todayHost.Steps.Insert(todayHost.Steps.IndexOf(todayStep) + 1, tomorrowStep);
-        }
-        tomorrowStep.ReviewCount = reviewsTomorrow;
-    }
-
-    /// <summary>
-    /// Bugünün düğümünü taşıyan ünite güncel; öncesindeki açık üniteler
+    /// <c>current</c> adımı taşıyan ünite güncel; öncesindeki açık üniteler
     /// tamamlanmış, sonrasındakiler açık ama başlanmamış.
     /// </summary>
     private static void AssignUnitStates(GetKartyPathResponse response)
     {
         var currentIndex = response.Units.FindIndex(
-            unit => unit.Steps.Any(step => step.State == "today"));
+            unit => unit.Steps.Any(step => step.State == "current"));
         for (var i = 0; i < response.Units.Count; i++)
         {
             var unit = response.Units[i];
@@ -290,14 +178,6 @@ public static class KartyPathBuilder
             Box = learning.Box,
             IsDue = KartyLeitner.IsDueForReview(learning.Box, learning.DueDate, utcNow),
         };
-
-    /// <summary>
-    /// Kelimenin tanışıldığı İstanbul günü. Eski satırlarda tanışma tarihi
-    /// yok (satır bir dönem yalnız doğru cevapta açılıyordu); o zaman ilk
-    /// doğru cevabın günü.
-    /// </summary>
-    private static DateOnly DayOf(PathLearning learning) =>
-        IstanbulDay.DateOf(learning.IntroducedDate ?? learning.FirstLearnedDate);
 }
 
 public sealed record PathUnit(int UnitId, int Sequence, string Title, int? EmblemKartyId);

@@ -27,11 +27,18 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
         await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
-        // Kart puan bandından rastgele seçilmiyor: önce vadesi gelmiş tekrar,
-        // sonra günlük kotayla sınırlı, ünite sırasıyla yeni kelime. Sıra
-        // `KartyScheduler`'da.
-        var selectedKartyId = await KartyScheduler.SelectKartyIdAsync(
-            _context, request.UserId, DateTime.UtcNow, cancellationToken);
+        // Kart puan bandından rastgele seçilmiyor: vadesi gelmiş tekrar (oyunun
+        // payı kadar, yeni kelimelerle karışık), oyunun destesinden yeni
+        // kelime, sonra pratik. Sıra `KartyScheduler`'da.
+        var game = request.UnitSequence is int unit
+            ? new KartyGameKey(
+                unit,
+                request.Deck is int deck && deck > 0 ? deck : null,
+                Math.Max(0, request.Reviews ?? 0))
+            : null;
+        var pick = await KartyScheduler.SelectAsync(
+            _context, request.UserId, DateTime.UtcNow, game, cancellationToken);
+        var selectedKartyId = pick.KartyId;
 
         var karty = selectedKartyId is null
             ? null
@@ -68,6 +75,7 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
         {
             KartyId = karty.KartyId,
             Mode = mode,
+            Stage = pick.Stage,
             Article = karty.Article,
             KartyUrl = karty.KartyUrl,
             AudioUrl = karty.AudioUrl,

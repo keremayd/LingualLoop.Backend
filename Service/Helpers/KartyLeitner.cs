@@ -32,21 +32,6 @@ public static class KartyLeitner
     /// </summary>
     private static readonly int[] IntervalDays = { 0, 1, 3, 7, 14, 30 };
 
-    /// <summary>
-    /// Günde kaç **yeni** kelime tanıştırılabilir.
-    ///
-    /// 8 seçildi çünkü denge durumunda günlük tekrar yükü
-    /// <c>N × (1/1 + 1/3 + 1/7 + 1/14 + 1/30) ≈ N × 1.58</c> oluyor; 8 yeni
-    /// kelime ≈ 13 tekrar, toplam ≈ 21 kart. 20 yeni kelime seçilseydi günde
-    /// ~52 kart ederdi — insan davranışına aykırı bir yük.
-    ///
-    /// **Bu bir duvar değil, öncelik.** Kota dolduğunda oyun bitmez; kullanıcı
-    /// tanıştığı kelimelerle sonsuza kadar pratik yapmaya devam eder
-    /// (<see cref="KartyScheduler"/>, 3. aşama). Yalnızca *yeni* kelime akışı
-    /// yavaşlar — yarınki tekrar yükü şişmesin diye.
-    /// </summary>
-    public const int DailyNewWordLimit = 8;
-
     public static int IntervalOf(int box) =>
         IntervalDays[Math.Clamp(box, 0, MaxBox)];
 

@@ -10,20 +10,6 @@ public class RecordKartyIntroductionResponse
     /// </summary>
     public DateTime IntroducedDate { get; set; }
 
-    /// <summary>
-    /// Bugün kaç kelimeyle tanışıldı ve tavan kaç.
-    ///
-    /// İstemci bu ikisini bilmeden kotanın dolduğunu anlayamaz: kart destesi
-    /// önceden çekildiği için elindeki tanışma kartı **eskimiş** olabilir.
-    /// </summary>
-    public int IntroducedToday { get; set; }
-
-    public int DailyLimit { get; set; }
-
-    /// <summary>
-    /// Tanışma kaydedildi mi. Kota doluyken gelen yeni bir kart <c>false</c>
-    /// döner: kullanıcı kartı görmüştür ama kelime bugüne yazılmaz, ileride
-    /// yeniden tanıştırılır.
-    /// </summary>
+    /// <summary>Tanışma kaydedildi mi; günlük tavan kalktığından beri hep <c>true</c>.</summary>
     public bool Recorded { get; set; }
 }
