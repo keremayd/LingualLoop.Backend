@@ -104,7 +104,6 @@ public class AuthenticationController : ControllerBase
     [HttpPost("google-login")]
     public async Task<ActionResult<ApiResponse<AuthenticateResponse>>> GoogleLogin([FromBody] ValidateUserByEmailRequest request)
     {
-        string photoSignedUrl = string.Empty;
         // 1. Google Token'ı doğrula
         var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
 
@@ -129,35 +128,61 @@ public class AuthenticationController : ControllerBase
             getUserByEmailResponse.User = registeredUser.User;
         }
 
-        photoSignedUrl = _amazonService.GeneratePreSignedUrl(getUserByEmailResponse.User.ProfilePhoto, BucketType.ProfilePhotos);
+        // 3–4. Rank, token ve fotoğraf
+        return Ok(new ApiResponse<AuthenticateResponse>
+        {
+            Data = await SessionFor(getUserByEmailResponse.User)
+        });
+    }
 
-        // 3. Rank bilgisini al
-        var userRank = await _mediator.Send(new GetRankByUserIdRequest() { UserId = getUserByEmailResponse.User.Id });
+    /// <summary>
+    /// Apple ile giriş: token sunucuda doğrulanır, hesap bulunur, bağlanır ya da
+    /// açılır (bkz. <see cref="AppleLoginCommandHandler"/>).
+    /// </summary>
+    [HttpPost("apple-login")]
+    public async Task<ActionResult<ApiResponse<AuthenticateResponse>>> AppleLogin([FromBody] AppleLoginRequest request)
+    {
+        var response = await _mediator.Send(request);
 
-        // 4. Token üret
+        return Ok(new ApiResponse<AuthenticateResponse>
+        {
+            Data = await SessionFor(response.User)
+        });
+    }
+
+    /// <summary>
+    /// Sosyal girişlerin ortak sonu: sıralama, oturum anahtarları ve imzalı
+    /// fotoğraf adresi. Apple ile açılan hesabın fotoğrafı yok; Google ile de
+    /// girebildiği için (e-posta eşleşmesi) adres boşsa imzalanmaz.
+    /// </summary>
+    private async Task<AuthenticateResponse> SessionFor(Postgres.Models.User user)
+    {
+        var userRank = await _mediator.Send(new GetRankByUserIdRequest() { UserId = user.Id });
+
         var createTokenResponse = await _mediator.Send(new CreateTokenRequest
         {
-            Id = getUserByEmailResponse.User!.Id,
+            Id = user.Id,
             Password = null,
             PopulateExp = true
         });
 
-        return Ok(new ApiResponse<AuthenticateResponse>
+        var photoSignedUrl = string.IsNullOrEmpty(user.ProfilePhoto)
+            ? string.Empty
+            : _amazonService.GeneratePreSignedUrl(user.ProfilePhoto, BucketType.ProfilePhotos);
+
+        return new AuthenticateResponse
         {
-            Data = new AuthenticateResponse
-            {
-                UserId = getUserByEmailResponse.User.Id,
-                FirstName = getUserByEmailResponse.User.FirstName!,
-                LastName = getUserByEmailResponse.User.LastName!,
-                DisplayName = getUserByEmailResponse.User.DisplayName,
-                ProfilePhotoUrl = photoSignedUrl,
-                UserName = getUserByEmailResponse.User.UserName!,
-                UserNickname = getUserByEmailResponse.User.UserNickname,
-                UserRank = userRank,
-                AccessToken = createTokenResponse.AccessToken,
-                RefreshToken = createTokenResponse.RefreshToken
-            }
-        });
+            UserId = user.Id,
+            FirstName = user.FirstName!,
+            LastName = user.LastName!,
+            DisplayName = user.DisplayName,
+            ProfilePhotoUrl = photoSignedUrl,
+            UserName = user.UserName!,
+            UserNickname = user.UserNickname,
+            UserRank = userRank,
+            AccessToken = createTokenResponse.AccessToken,
+            RefreshToken = createTokenResponse.RefreshToken
+        };
     }
 
     [HttpPost("refresh")]

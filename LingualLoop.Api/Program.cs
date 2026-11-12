@@ -34,6 +34,12 @@ Console.WriteLine("[startup] postgres/aws registered");
 builder.Services.Configure<KartyAdminOptions>(
     builder.Configuration.GetSection(KartyAdminOptions.SectionName));
 
+// Apple ile giriş: token'ın alıcısı paket kimliği; Apple'ın anahtarları
+// bellekte tutulur, bu yüzden doğrulayıcı tek örnek.
+builder.Services.Configure<AppleOptions>(
+    builder.Configuration.GetSection(AppleOptions.SectionName));
+builder.Services.AddSingleton<Service.Helpers.AppleIdentityValidator>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",

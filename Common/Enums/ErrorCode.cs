@@ -78,4 +78,7 @@ public enum ErrorCode
 
     [Description("İçerik girişi anahtarı geçersiz ya da eksik!")]
     KartyAdminKeyInvalid = 4125,
+
+    [Description("Apple kimliği doğrulanamadı! sebep = {0}")]
+    AppleIdentityInvalid = 4126,
 }
