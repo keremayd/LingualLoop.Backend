@@ -92,6 +92,22 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<GetWordCollectionResponse> { Data = response });
     }
 
+    /// <summary>
+    /// Hesabı ve bütün verisini kalıcı olarak siler. Yalnız hesabın sahibi
+    /// silebilir: yoldaki kimlik token'daki kullanıcıyla aynı olmalı.
+    /// </summary>
+    [Authorize]
+    [HttpDelete("{id}/account")]
+    public async Task<ActionResult<ApiResponse<DeleteAccountResponse>>> DeleteAccount(
+        [FromRoute] string id)
+    {
+        if (!string.Equals(User.Identity?.Name, id, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new DeleteAccountRequest { UserId = id });
+        return Ok(new ApiResponse<DeleteAccountResponse> { Data = response });
+    }
+
     [HttpPost("{id}/daily-activity")]
     public async Task<ActionResult<ApiResponse<RecordDailyActivityResponse>>> RecordDailyActivity(
         [FromRoute] string id)

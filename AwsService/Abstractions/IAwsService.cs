@@ -18,4 +18,11 @@ public interface IAwsService
         string contentType,
         BucketType bucketType = BucketType.ProfilePhotos);
     string GeneratePreSignedUrl(string key, BucketType bucketType, int expireMinutes = 120);
+
+    /// <summary>
+    /// Klasörün (öneki '/' ile biten anahtarların) altındaki bütün nesneleri
+    /// siler; hesap silinince profil fotoğrafları için. Önek bir klasör
+    /// değilse hata verir: boş ya da eksik önek kovanın tamamını kapsardı.
+    /// </summary>
+    Task DeleteFolderAsync(string prefix, BucketType bucketType = BucketType.ProfilePhotos);
 }

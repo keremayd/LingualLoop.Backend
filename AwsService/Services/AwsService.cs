@@ -48,4 +48,37 @@ public class AwsService : IAwsService
 
         return _amazonClient.GetPreSignedURL(request);
     }
+
+    public async Task DeleteFolderAsync(
+        string prefix,
+        BucketType bucketType = BucketType.ProfilePhotos)
+    {
+        if (string.IsNullOrWhiteSpace(prefix) ||
+            !prefix.EndsWith('/') ||
+            prefix.Trim('/').Length == 0)
+        {
+            throw new ArgumentException("Önek '/' ile biten bir klasör olmalı.", nameof(prefix));
+        }
+
+        var bucket = _bucketFactory.GetBucketName(bucketType);
+        var request = new ListObjectsV2Request { BucketName = bucket, Prefix = prefix };
+        ListObjectsV2Response page;
+        do
+        {
+            page = await _amazonClient.ListObjectsV2Async(request);
+            // SDK 4'te boş sonuçta liste null geliyor.
+            if (page.S3Objects is { Count: > 0 })
+            {
+                await _amazonClient.DeleteObjectsAsync(new DeleteObjectsRequest
+                {
+                    BucketName = bucket,
+                    Objects = page.S3Objects
+                        .Select(item => new KeyVersion { Key = item.Key })
+                        .ToList(),
+                });
+            }
+
+            request.ContinuationToken = page.NextContinuationToken;
+        } while (page.IsTruncated == true);
+    }
 }
