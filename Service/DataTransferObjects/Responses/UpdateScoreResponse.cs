@@ -10,6 +10,5 @@ public class UpdateScoreResponse
     /// <summary>İlerleme sayacı; yalnızca artar. Kullanıcıya gösterilen sayı.</summary>
     public int? Experience { get; set; }
 
-    public int? Lives { get; set; }
     public LeagueProgressResponse? League { get; set; }
 }

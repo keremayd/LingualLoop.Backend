@@ -132,28 +132,14 @@ public class UserController : ControllerBase
             KartyId = request.KartyId
         });
 
-        if (request.Point == -1)
+        // Yanlış cevap Rövanş'a düşer ve kutuyu sıfırlar, bilet yakmaz: bedel
+        // yalnız oyuna girişte alınır.
+        if (request.Point == -1 && request.KartyId.HasValue)
         {
-            if (request.KartyId.HasValue)
+            await _mediator.Send(new RecordWrongKartyRequest()
             {
-                await _mediator.Send(new RecordWrongKartyRequest()
-                {
-                    UserId = request.UserId,
-                    KartyId = request.KartyId.Value
-                });
-            }
-
-            var updateLivesResponse = await _mediator.Send(new UpdateLivesRequest() { UserId = request.UserId });
-            
-            return Ok(new ApiResponse<UpdateScoreResponse>()
-            {
-                Data = new UpdateScoreResponse()
-                {
-                    UserId = updateScoreResponse.UserId,
-                    Score = updateScoreResponse.Score,
-                    Experience = updateScoreResponse.Experience,
-                    Lives = updateLivesResponse.Lives
-                }
+                UserId = request.UserId,
+                KartyId = request.KartyId.Value
             });
         }
 
