@@ -32,11 +32,11 @@ namespace Service.Handlers.Commands.Karty;
 /// Yani ayrım keyfi değil: **kartı kullanılamaz kılan** eksik geri alınıyor,
 /// **kendiliğinden kapanan** eksik uyarıya çevriliyor.
 ///
-/// ## Yazım sorusu burada üretilmiyor
+/// ## Sorular burada üretilmiyor
 ///
 /// `question_text` / `correct_text` / `is_correct` kolonları duruyor ama
-/// okunmuyor: soru her elde <see cref="KartySpellingChallengeBuilder"/> ile
-/// `noun_text`'ten türetiliyor. Bu yüzden kart oluşturmak için gereken tek
+/// okunmuyor: soru `noun_text`'ten ve kullanıcının kutusundan türüyor
+/// (<see cref="KartyPresentationPolicy"/>). Bu yüzden kart oluşturmak için gereken tek
 /// dilbilgisi verisi **isim + artikel**. Kolonlara sabit değer yazılıyor ki
 /// eski satırlarla aynı biçimde kalsınlar.
 /// </summary>

@@ -62,18 +62,28 @@ public class KartyController : ControllerBase
         // eklenen `Mode` alanı kopyalanmadığı için istemciye hep varsayılan
         // değer gidiyordu ve tanışma kartı hiç görünmüyordu. Alan kopyalayan
         // her controller aynı sessiz hatayı üretmeye adaydır.
-        kartyQuestion.KartyUrl =
-            _amazonService.GeneratePreSignedUrl(kartyQuestion.KartyUrl, BucketType.KartyAssets);
-        // Ses üretilmemiş kartta anahtar null; imzalanacak bir şey yok ve
-        // istemci butonu göstermiyor.
-        kartyQuestion.AudioUrl = string.IsNullOrEmpty(kartyQuestion.AudioUrl)
-            ? null
-            : _amazonService.GeneratePreSignedUrl(kartyQuestion.AudioUrl, BucketType.KartyAssets);
+        SignUrls(kartyQuestion);
 
         return Ok(new ApiResponse<GetKartyByScoreResponse>()
         {
             Data = kartyQuestion
         });
+    }
+
+    private void SignUrls(GetKartyByScoreResponse question)
+    {
+        question.KartyUrl =
+            _amazonService.GeneratePreSignedUrl(question.KartyUrl, BucketType.KartyAssets);
+        // Ses üretilmemiş kartta anahtar null; imzalanacak bir şey yok ve
+        // istemci butonu göstermiyor.
+        question.AudioUrl = string.IsNullOrEmpty(question.AudioUrl)
+            ? null
+            : _amazonService.GeneratePreSignedUrl(question.AudioUrl, BucketType.KartyAssets);
+        foreach (var option in question.Options)
+        {
+            option.KartyUrl =
+                _amazonService.GeneratePreSignedUrl(option.KartyUrl, BucketType.KartyAssets);
+        }
     }
 
     /// <summary>
@@ -169,13 +179,7 @@ public class KartyController : ControllerBase
         // nesne iletiliyor. Rövanşta tanışma modu zaten oluşmaz (kullanıcı o
         // kelimeyi görmüş ve yanlış bilmiş) ama alan kopyalayan kod ileride
         // eklenen her alanı sessizce düşürür.
-        kartyQuestion.KartyUrl =
-            _amazonService.GeneratePreSignedUrl(kartyQuestion.KartyUrl, BucketType.KartyAssets);
-        // Ses üretilmemiş kartta anahtar null; imzalanacak bir şey yok ve
-        // istemci butonu göstermiyor.
-        kartyQuestion.AudioUrl = string.IsNullOrEmpty(kartyQuestion.AudioUrl)
-            ? null
-            : _amazonService.GeneratePreSignedUrl(kartyQuestion.AudioUrl, BucketType.KartyAssets);
+        SignUrls(kartyQuestion);
 
         return Ok(new ApiResponse<GetKartyByScoreResponse>()
         {

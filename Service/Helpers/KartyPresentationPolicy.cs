@@ -21,13 +21,27 @@ public static class KartyPresentationPolicy
     /// Kullanıcının bu kartla geçmişi. <c>null</c> ise kelimeyle hiç
     /// karşılaşmamış demektir.
     /// </param>
-    public static KartyCardMode Decide(UserKartyLearning? learning)
+    /// <param name="hasAudio">Kartın sesi üretilmiş mi; yoksa dinleme sorulamaz.</param>
+    public static KartyCardMode Decide(UserKartyLearning? learning, bool hasAudio)
     {
         // Satırın **varlığı** yetmez: satır bir zamanlar yalnız doğru cevapta
         // oluşturuluyordu, yani eski kayıtlarda tanışma anı hiç yaşanmamış
         // olabilir. Tanışmanın kendi damgası var.
         return learning?.IntroducedDate is null
             ? KartyCardMode.Introduce
-            : KartyCardMode.Spelling;
+            : ForBox(learning.Box, hasAudio);
     }
+
+    /// <summary>
+    /// Kelime pekiştikçe zorlaşan soru sırası: önce anlam, sonra artikel,
+    /// sonra yazım, en son dinleme. Yeni öğrenen hiçbir zaman yanlış yazılmış
+    /// bir kelime görmez.
+    /// </summary>
+    public static KartyCardMode ForBox(int box, bool hasAudio) => box switch
+    {
+        <= 0 => KartyCardMode.PickImage,
+        1 => KartyCardMode.PickArticle,
+        2 => KartyCardMode.ArrangeLetters,
+        _ => hasAudio ? KartyCardMode.Listen : KartyCardMode.ArrangeLetters,
+    };
 }

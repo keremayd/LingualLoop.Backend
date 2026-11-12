@@ -37,6 +37,7 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
                 history.Karty.NounText,
                 history.Karty.Article,
                 KartyUrl = history.Karty.KartyUrl,
+                history.Karty.AudioUrl,
                 MinScore = history.Karty.MinScore,
                 MaxScore = history.Karty.MaxScore,
             })
@@ -48,18 +49,28 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
                 ErrorCode.NoDataFoundInKarty.GetDescription(0), HttpStatusCode.BadRequest);
         }
 
-        var challenge = KartySpellingChallengeBuilder.Build(karty.NounText);
+        var box = await _context.UserKartyLearnings
+            .AsNoTracking()
+            .Where(item => item.UserId == request.UserId && item.KartyId == karty.KartyId)
+            .Select(item => (int?)item.Box)
+            .FirstOrDefaultAsync(cancellationToken) ?? 0;
 
-        return new GetKartyByScoreResponse
+        var response = new GetKartyByScoreResponse
         {
             KartyId = karty.KartyId,
-            QuestionText = challenge.DisplayText,
-            CorrectText = challenge.CorrectText,
+            CorrectText = karty.NounText,
             Article = karty.Article,
             KartyUrl = karty.KartyUrl,
+            AudioUrl = karty.AudioUrl,
             MinScore = karty.MinScore,
             MaxScore = karty.MaxScore,
-            IsCorrect = challenge.IsCorrect,
         };
+        response.Mode = await KartyQuestionOptions.FillAsync(
+            _context,
+            request.UserId,
+            response,
+            KartyPresentationPolicy.ForBox(box, !string.IsNullOrEmpty(karty.AudioUrl)),
+            cancellationToken);
+        return response;
     }
 }

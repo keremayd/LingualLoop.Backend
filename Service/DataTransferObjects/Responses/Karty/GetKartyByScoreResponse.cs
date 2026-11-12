@@ -13,14 +13,13 @@ public class GetKartyByScoreResponse
     /// istemcide sessizce yanlış moda dönüşebilirdi.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public KartyCardMode Mode { get; set; } = KartyCardMode.Spelling;
+    public KartyCardMode Mode { get; set; } = KartyCardMode.PickArticle;
 
     /// <summary>
     /// Kartın geldiği aşama: <c>review</c> · <c>test</c> · <c>new</c> ·
     /// <c>practice</c>. İstemci oyundaki tekrar sayısını bununla tutar.
     /// </summary>
     public string Stage { get; set; } = "new";
-    public string QuestionText { get; set; } = string.Empty;
     public string CorrectText { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
     public string KartyUrl { get; set; } = string.Empty;
@@ -33,7 +32,9 @@ public class GetKartyByScoreResponse
     /// tetikleyebilirdi; yokluğun tipte görünmesi daha güvenli.
     /// </summary>
     public string? AudioUrl { get; set; }
-    public bool IsCorrect { get; set; }
+
+    /// <summary>Görsel seçilen sorularda seçenekler, doğrusu dahil karışık sırayla.</summary>
+    public List<KartyOptionResponse> Options { get; set; } = [];
     public int MinScore { get; set; }
     public int MaxScore { get; set; }
 }

@@ -69,13 +69,13 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
                 item => item.UserId == request.UserId && item.KartyId == karty.KartyId,
                 cancellationToken);
 
-        var mode = KartyPresentationPolicy.Decide(learning);
+        var mode = KartyPresentationPolicy.Decide(learning, !string.IsNullOrEmpty(karty.AudioUrl));
 
         var response = new GetKartyByScoreResponse
         {
             KartyId = karty.KartyId,
-            Mode = mode,
             Stage = pick.Stage,
+            CorrectText = karty.NounText,
             Article = karty.Article,
             KartyUrl = karty.KartyUrl,
             AudioUrl = karty.AudioUrl,
@@ -83,21 +83,8 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
             MaxScore = karty.MaxScore,
         };
 
-        if (mode == KartyCardMode.Introduce)
-        {
-            // Tanışmada soru yok: kelime **doğru** yazımıyla gösterilir.
-            // `KartySpellingChallengeBuilder` burada hiç çağrılmıyor, çünkü
-            // %50 ihtimalle bozuk yazım üretiyor ve ilk temas onunla olamaz.
-            response.QuestionText = karty.NounText;
-            response.CorrectText = karty.NounText;
-            response.IsCorrect = true;
-            return response;
-        }
-
-        var challenge = KartySpellingChallengeBuilder.Build(karty.NounText);
-        response.QuestionText = challenge.DisplayText;
-        response.CorrectText = challenge.CorrectText;
-        response.IsCorrect = challenge.IsCorrect;
+        response.Mode = await KartyQuestionOptions.FillAsync(
+            _context, request.UserId, response, mode, cancellationToken);
         return response;
     }
 }

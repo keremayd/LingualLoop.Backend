@@ -4,25 +4,26 @@ namespace Common.Enums;
 /// Bir Karty kartının kullanıcıya **nasıl sunulacağı**.
 ///
 /// Kart seçimi ile sunum biçimi ayrı kararlardır: hangi kartın geleceğini
-/// puan bandı belirler, o kartın soru mu tanışma mı olacağını kullanıcının o
-/// kelimeyle geçmişi belirler. İkisi tek bir bayrağa sıkıştırılmamalı çünkü
-/// sunum biçimleri çoğalacak (çoktan seçmeli, yazma…).
+/// seçici belirler, o kartın nasıl sorulacağını kullanıcının o kelimeyle
+/// geçmişi (<c>KartyPresentationPolicy</c>).
 /// </summary>
 public enum KartyCardMode
 {
     /// <summary>
-    /// Kelimeyle **ilk tanışma**. Soru sorulmaz; kelime doğru yazımıyla,
-    /// artikeliyle ve görseliyle gösterilir.
-    ///
-    /// Bu adım olmadan Karty öğretmeden soruyordu: yazım sorusu kelimeyi
-    /// %50 ihtimalle **bozuk** gösterdiği için ilk temas yanlış formla
-    /// oluyordu.
+    /// Kelimeyle **ilk tanışma**. Soru sorulmaz; kelime, artikeli, görseli ve
+    /// sesiyle gösterilir.
     /// </summary>
     Introduce = 0,
 
-    /// <summary>
-    /// Yazım sorusu — kelime ya doğru yazılmış ya iki harfi yer değiştirmiş
-    /// hâlde gösterilir, kullanıcı karar verir.
-    /// </summary>
-    Spelling = 1,
+    /// <summary>Kelime yazılı, dört görsel arasından doğrusu bulunur (anlam).</summary>
+    PickImage = 1,
+
+    /// <summary>Görsel ve kelime görünür, artikel sorulur.</summary>
+    PickArticle = 2,
+
+    /// <summary>Görselden kelimenin harfleri sırayla dizilir (yazım).</summary>
+    ArrangeLetters = 3,
+
+    /// <summary>Kelime yalnız duyulur, dört görsel arasından doğrusu bulunur.</summary>
+    Listen = 4,
 }

@@ -16,10 +16,9 @@ namespace Service.Helpers;
 /// kez doğru bilmek hiçbir şey kanıtlamaz; kanıtlayan şey ertesi gün de
 /// bilmektir. Kutu tam olarak bunu ölçüyor.
 ///
-/// Yan fayda: şans eseri doğrular kendiliğinden eleniyor. Karty ikili bir
-/// soru olduğu için hiçbir şey bilmeyen kullanıcı %50 tutturur; o tahmin
-/// kutuyu bir kademe ilerletir ama ertesi günkü tekrar onu yakalar ve kutu
-/// sıfırlanır. Soru tipini değiştirmeden tahmin şansı sönümleniyor.
+/// Yan fayda: şans eseri doğrular kendiliğinden eleniyor. Tahminle bilinen
+/// bir kelime kutuyu bir kademe ilerletir ama ertesi günkü tekrar onu
+/// yakalar ve kutu sıfırlanır.
 /// </summary>
 public static class KartyLeitner
 {
