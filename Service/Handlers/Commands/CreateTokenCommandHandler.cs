@@ -69,6 +69,13 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, Cre
         return tokenOptions;
     }
 
+    /// <summary>
+    /// Oturumun hiç kullanılmadan ayakta kalacağı süre. Token yenilemede
+    /// döndürülmez: açılışta paralel giden istekler aynı anda yenileme yapıyor,
+    /// döndürülseydi ilki dışındakiler reddedilip oturumu kapatırdı.
+    /// </summary>
+    private const int RefreshTokenLifetimeDays = 60;
+
     public static string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
@@ -90,8 +97,11 @@ public class CreateTokenCommandHandler : IRequestHandler<CreateTokenRequest, Cre
         if (request.PopulateExp)
         {
             user.RefreshToken = GenerateRefreshToken();
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         }
+
+        // Süre her girişte ve her yenilemede baştan başlar: uygulamayı düzenli
+        // açan kullanıcıdan bir daha şifre istenmez.
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays);
 
         await _userManager.UpdateAsync(user);
         
