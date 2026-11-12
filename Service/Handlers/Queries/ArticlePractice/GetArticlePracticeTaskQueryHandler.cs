@@ -13,7 +13,7 @@ public class GetArticlePracticeTaskQueryHandler
     : IRequestHandler<GetArticlePracticeTaskRequest, GetArticlePracticeTaskResponse>
 {
     private const int RequiredWordCount = 2;
-    private const int LearningGoal = 5;
+    private const int LearningGoal = KartyLeitner.ArticleLearningGoal;
     private readonly LingualLoopContext _context;
 
     public GetArticlePracticeTaskQueryHandler(

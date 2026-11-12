@@ -12,7 +12,7 @@ namespace Service.Handlers.Queries.Profile;
 public class GetProfileLearningStatsQueryHandler
     : IRequestHandler<GetProfileLearningStatsRequest, GetProfileLearningStatsResponse>
 {
-    private const int ArticleLearningGoal = 5;
+    private const int ArticleLearningGoal = KartyLeitner.ArticleLearningGoal;
 
     private readonly LingualLoopContext _context;
 

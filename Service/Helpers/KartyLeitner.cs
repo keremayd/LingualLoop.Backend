@@ -26,6 +26,9 @@ public static class KartyLeitner
     /// <summary>Mezuniyet kutusu. Buradan sonra aralık uzamaz.</summary>
     public const int MaxBox = 5;
 
+    /// <summary>Bir kelimenin artikeli kaç doğru cevapla öğrenilmiş sayılır.</summary>
+    public const int ArticleLearningGoal = 5;
+
     /// <summary>
     /// Kutu 0: tanıştırıldı ama henüz doğru bilinmedi.
     /// Kutu 1–5: her doğru cevapta bir kademe, aralık uzayarak.
