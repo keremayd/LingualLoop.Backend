@@ -32,8 +32,10 @@ public class GetDailyQuestsQueryHandler : IRequestHandler<GetDailyQuestsRequest,
             .Select(c => c.QuestKey)
             .ToListAsync(cancellationToken);
 
+        var day = await QuestRules.ReadDayStateAsync(_context, request.UserId, utcNow, cancellationToken);
+
         var quests = new List<DailyQuestResponse>();
-        foreach (var definition in QuestRules.DailyQuests)
+        foreach (var definition in QuestRules.ChooseForDay(day, claimedKeys))
         {
             var progress = await QuestRules.GetProgressAsync(
                 _context, request.UserId, definition.Key, utcNow, cancellationToken);

@@ -1,7 +1,3 @@
-using System.Net;
-using Common.Enums;
-using Common.Extensions;
-using Common.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Postgres;
@@ -26,29 +22,18 @@ public class ClaimQuestRewardCommandHandler : IRequestHandler<ClaimQuestRewardRe
     {
         await UserQuestClaimSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
-        var definition = QuestRules.Find(request.QuestKey);
-        if (definition is null)
-        {
-            throw new LingualLoopException(
-                ErrorCode.NoDataInUsers.CreateMessage(request.QuestKey),
-                $"Bilinmeyen görev: {request.QuestKey}",
-                HttpStatusCode.BadRequest);
-        }
-
         var utcNow = DateTime.UtcNow;
         var dayKey = QuestRules.GetDayKey(utcNow);
 
         var userLives = await UserLivesSeeder.GetOrCreateAsync(
             _context, request.UserId, utcNow, cancellationToken);
 
-        var alreadyClaimed = await _context.UserQuestClaims
+        var claimedToday = await _context.UserQuestClaims
             .AsNoTracking()
-            .AnyAsync(
-                c => c.UserId == request.UserId &&
-                     c.QuestKey == request.QuestKey &&
-                     c.DayKey == dayKey,
-                cancellationToken);
-        if (alreadyClaimed)
+            .Where(c => c.UserId == request.UserId && c.DayKey == dayKey)
+            .Select(c => c.QuestKey)
+            .ToListAsync(cancellationToken);
+        if (claimedToday.Contains(request.QuestKey))
         {
             return new ClaimQuestRewardResponse
             {
@@ -59,9 +44,17 @@ public class ClaimQuestRewardCommandHandler : IRequestHandler<ClaimQuestRewardRe
             };
         }
 
-        var progress = await QuestRules.GetProgressAsync(
-            _context, request.UserId, request.QuestKey, utcNow, cancellationToken);
-        if (progress < definition.Target)
+        // Hedef ve ödül, listeyi üreten seçimden okunur: rövanş görevinin
+        // hedefi kullanıcıya göre değişiyor. Bugünün görevi olmayan anahtar
+        // (istemcide eski liste) ödül almaz.
+        var day = await QuestRules.ReadDayStateAsync(_context, request.UserId, utcNow, cancellationToken);
+        var definition = QuestRules.ChooseForDay(day, claimedToday)
+            .FirstOrDefault(q => q.Key == request.QuestKey);
+        var progress = definition is null
+            ? 0
+            : await QuestRules.GetProgressAsync(
+                _context, request.UserId, request.QuestKey, utcNow, cancellationToken);
+        if (definition is null || progress < definition.Target)
         {
             return new ClaimQuestRewardResponse
             {
