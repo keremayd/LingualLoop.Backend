@@ -53,11 +53,23 @@ public class GetDailyQuestsQueryHandler : IRequestHandler<GetDailyQuestsRequest,
             });
         }
 
+        await UserDailyActivitySchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        var (freezeCount, freezeCap) = await QuestFreezeBonus.ReadFreezesAsync(
+            _context, request.UserId, utcNow, cancellationToken);
+
         return new GetDailyQuestsResponse
         {
             DayKey = dayKey,
             ResetAtUtc = endUtc,
             Quests = quests,
+            FreezeBonus = new QuestFreezeBonusResponse
+            {
+                Completed = quests.Count(q => q.IsCompleted),
+                Total = quests.Count,
+                Claimed = claimedKeys.Contains(QuestFreezeBonus.ClaimKey),
+                FreezeCount = freezeCount,
+                FreezeCap = freezeCap,
+            },
         };
     }
 }

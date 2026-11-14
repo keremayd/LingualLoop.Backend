@@ -41,4 +41,17 @@ public class QuestController : ControllerBase
             Data = response
         });
     }
+
+    /// <summary>Günün bütün görevleri bitince seri korumasını toplar.</summary>
+    [HttpPost("freeze")]
+    public async Task<ActionResult<ApiResponse<ClaimQuestFreezeResponse>>> ClaimFreeze(
+        [FromBody] ClaimQuestFreezeRequest request)
+    {
+        var response = await _mediator.Send(request);
+
+        return Ok(new ApiResponse<ClaimQuestFreezeResponse>()
+        {
+            Data = response
+        });
+    }
 }
