@@ -22,15 +22,18 @@ public class KartyController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IAwsService _amazonService;
     private readonly KartyAdminOptions _adminOptions;
+    private readonly IWebHostEnvironment _environment;
 
     public KartyController(
         IMediator mediator,
         IAwsService amazonService,
-        IOptions<KartyAdminOptions> adminOptions)
+        IOptions<KartyAdminOptions> adminOptions,
+        IWebHostEnvironment environment)
     {
         _mediator = mediator;
         _amazonService = amazonService;
         _adminOptions = adminOptions.Value;
+        _environment = environment;
     }
 
     /// <summary>
@@ -305,6 +308,34 @@ public class KartyController : ControllerBase
             cancellationToken);
 
         return Ok(new ApiResponse<UpsertKartyUnitResponse> { Data = response });
+    }
+
+    /// <summary>
+    /// İçerik girişi: yanlış ya da hatalı üretilmiş kartı satırı ve S3'teki
+    /// görsel + telaffuzuyla kalıcı olarak siler. Kullanıcı kaydı olan kart
+    /// (biri öğrenmiş ya da cevaplamış) yalnız <c>?force=true</c> ile silinir;
+    /// o kayıtlar da silinir. Kimlik: `X-Karty-Admin-Key`.
+    ///
+    /// **Yalnız Development'ta açık, yayından önce kaldırılacak** (CLAUDE.md
+    /// §8 "Yayın öncesi yapılacaklar"). Başka ortamda uç yokmuş gibi gövdesiz
+    /// 404 döner; anahtar sızsa bile canlıda kart silinemez.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpDelete("admin/{kartyId:int}")]
+    public async Task<ActionResult<ApiResponse<DeleteKartyResponse>>> DeleteKarty(
+        [FromRoute] int kartyId,
+        [FromQuery] bool force,
+        CancellationToken cancellationToken)
+    {
+        if (!_environment.IsDevelopment()) return NotFound();
+
+        EnsureAdminKey();
+
+        var response = await _mediator.Send(
+            new DeleteKartyRequest { KartyId = kartyId, Force = force },
+            cancellationToken);
+
+        return Ok(new ApiResponse<DeleteKartyResponse> { Data = response });
     }
 
     /// <summary>

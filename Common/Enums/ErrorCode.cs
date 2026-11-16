@@ -81,4 +81,10 @@ public enum ErrorCode
 
     [Description("Apple kimliği doğrulanamadı! sebep = {0}")]
     AppleIdentityInvalid = 4126,
+
+    [Description("Kart bulunamadı! kartyid = {0}")]
+    KartyNotFound = 4127,
+
+    [Description("Kartta kullanıcı kaydı var; silmek için force=true gerekir ve bu kayıtlar da silinir! kartyid = {0}, öğrenme = {1}, cevap geçmişi = {2}")]
+    KartyHasUserProgress = 4128,
 }
