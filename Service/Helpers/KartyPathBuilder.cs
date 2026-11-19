@@ -113,6 +113,7 @@ public static class KartyPathBuilder
                     State = state,
                     Deck = d + 1,
                     NewCount = seen.Count,
+                    LearnedCount = tested,
                     NewGoal = deck.Count,
                     DueCount = seen.Count(card => KartyLeitner.IsDueForReview(
                         learningById[card.KartyId].Box,

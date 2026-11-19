@@ -54,6 +54,15 @@ public class KartyPathStepResponse
     /// <summary>Bu destede tanışılan kelime.</summary>
     public int NewCount { get; set; }
 
+    /// <summary>
+    /// Bu destede en az bir kez doğru bilinen kelime (kutu ≥ 1). Deste bu
+    /// sayı destenin büyüklüğüne varınca biter (<c>KartyDeckRules.IsComplete</c>);
+    /// istemcinin kelime halkası ve "3/8 yeni" bunu gösterir, tanışılanı
+    /// değil: tanışılıp yanlış bilinen kelimeyle halka dolup deste
+    /// açılmıyordu (19 Kas 2026, kullanıcı).
+    /// </summary>
+    public int LearnedCount { get; set; }
+
     /// <summary>Destenin büyüklüğü.</summary>
     public int NewGoal { get; set; }
 
