@@ -59,7 +59,17 @@ public class GetKartySessionStatusQueryHandler
             .Where(karty => karty.UnitId == unit.KartyUnitId)
             .OrderBy(karty => karty.UnitOrder ?? int.MaxValue)
             .ThenBy(karty => karty.KartyId)
-            .Select(karty => new { karty.KartyId, karty.NounText, karty.Article, karty.KartyUrl })
+            .Select(karty => new
+            {
+                karty.KartyId,
+                karty.NounText,
+                karty.Article,
+                karty.KartyUrl,
+                Meaning = _context.KartyTranslations
+                    .Where(row => row.KartyId == karty.KartyId && row.Locale == request.Locale)
+                    .Select(row => row.Meaning)
+                    .FirstOrDefault(),
+            })
             .ToListAsync(cancellationToken);
         var ids = unitCards.Select(card => card.KartyId).ToList();
         var learnings = await _context.UserKartyLearnings
@@ -94,6 +104,7 @@ public class GetKartySessionStatusQueryHandler
                         NounText = card.NounText,
                         Article = card.Article,
                         KartyUrl = card.KartyUrl,
+                        Meaning = card.Meaning,
                         Box = learning?.Box ?? 0,
                         IsDue = learning is not null &&
                                 KartyLeitner.IsDueForReview(learning.Box, learning.DueDate, now),

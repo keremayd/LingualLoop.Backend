@@ -3,6 +3,7 @@ using AwsService.Abstractions;
 using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
+using LingualLoop.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -77,6 +78,7 @@ public class UserController : ControllerBase
             UserId = id,
             Category = category,
             Page = page,
+            Locale = Request.NativeLanguage(),
         });
 
         foreach (var item in response.Items)

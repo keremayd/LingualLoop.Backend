@@ -25,6 +25,12 @@ public class GetKartyByScoreResponse
     public string KartyUrl { get; set; } = string.Empty;
 
     /// <summary>
+    /// Kelimenin kullanıcının ana dilindeki anlamı (<c>karty_translation</c>);
+    /// o dilde girilmemişse <c>null</c>.
+    /// </summary>
+    public string? Meaning { get; set; }
+
+    /// <summary>
     /// Kelimenin Almanca telaffuzu (imzalı URL). Ses henüz üretilmemişse
     /// <c>null</c> — o kartta telaffuz butonu **gösterilmez**.
     ///

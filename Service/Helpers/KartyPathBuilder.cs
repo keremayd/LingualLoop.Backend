@@ -175,6 +175,7 @@ public static class KartyPathBuilder
             NounText = card.NounText,
             Article = card.Article,
             KartyUrl = card.KartyUrl,
+            Meaning = card.Meaning,
             Box = learning.Box,
             IsDue = KartyLeitner.IsDueForReview(learning.Box, learning.DueDate, utcNow),
         };
@@ -188,7 +189,8 @@ public sealed record PathCard(
     int? UnitOrder,
     string NounText,
     string Article,
-    string KartyUrl);
+    string KartyUrl,
+    string? Meaning = null);
 
 public sealed record PathLearning(
     int KartyId,

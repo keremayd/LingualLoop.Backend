@@ -68,6 +68,10 @@ public class CreateKartyCommandHandler
     {
         await KartyAudioSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
         await KartyUnitSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        await KartyTranslationSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+
+        // Geçersiz dil kart satırı açılmadan reddedilsin.
+        var meanings = KartyTranslationWriter.Normalize(request.Meanings);
 
         var nounText = (request.NounText ?? string.Empty).Trim();
         var article = (request.Article ?? string.Empty).Trim().ToLowerInvariant();
@@ -139,6 +143,11 @@ public class CreateKartyCommandHandler
 
         karty.KartyUrl = imageKey;
 
+        // Anlamlar görsel yerine oturduktan sonra yazılıyor: görsel düşüp yeni
+        // satır silinseydi anlam satırları da boşa yazılmış olurdu.
+        var savedMeanings = await KartyTranslationWriter.SetMeaningsAsync(
+            _context, karty.KartyId, meanings, cancellationToken);
+
         var response = new CreateKartyResponse
         {
             KartyId = karty.KartyId,
@@ -153,6 +162,7 @@ public class CreateKartyCommandHandler
             UnitOrder = karty.UnitOrder,
             KartyUrl = imageKey,
             Updated = isUpdate,
+            Meanings = savedMeanings,
         };
 
         await SynthesizeAudioAsync(karty, response, cancellationToken);

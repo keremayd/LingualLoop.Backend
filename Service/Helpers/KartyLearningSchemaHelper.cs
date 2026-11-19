@@ -116,6 +116,8 @@ public static class KartyLearningSchemaHelper
                 cancellationToken);
             // `Karty` satırını tam yükleyen sorgular ünite kolonlarını da okur.
             await KartyUnitSchemaHelper.EnsureCreatedAsync(context, cancellationToken);
+            // Kart döndüren sorgular anlamı ve ünite adını kullanıcının dilinde okur.
+            await KartyTranslationSchemaHelper.EnsureCreatedAsync(context, cancellationToken);
             _isReady = true;
         }
         finally

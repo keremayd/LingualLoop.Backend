@@ -87,4 +87,7 @@ public enum ErrorCode
 
     [Description("Kartta kullanıcı kaydı var; silmek için force=true gerekir ve bu kayıtlar da silinir! kartyid = {0}, öğrenme = {1}, cevap geçmişi = {2}")]
     KartyHasUserProgress = 4128,
+
+    [Description("Desteklenmeyen dil! dil = {0}, desteklenenler = {1}")]
+    UnsupportedLanguage = 4129,
 }

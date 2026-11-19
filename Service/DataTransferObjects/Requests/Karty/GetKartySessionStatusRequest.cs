@@ -16,4 +16,7 @@ public class GetKartySessionStatusRequest : IRequest<GetKartySessionStatusRespon
 
     /// <summary>Oyunda cevaplanan tekrar kartı sayısı; oyunun tekrar payıyla karşılaştırılır.</summary>
     public int ReviewsAnswered { get; set; }
+
+    /// <summary>Kullanıcının ana dili (<c>LocaleRules</c>); anlam ve ünite adı bu dilde döner.</summary>
+    public string Locale { get; set; } = Service.Helpers.LocaleRules.Default;
 }

@@ -19,6 +19,12 @@ public class WordCollectionItemResponse
     public string Article { get; set; } = string.Empty;
     public string KartyUrl { get; set; } = string.Empty;
     public string? AudioUrl { get; set; }
+
+    /// <summary>
+    /// Kelimenin kullanıcının ana dilindeki anlamı (<c>karty_translation</c>);
+    /// o dilde girilmemişse <c>null</c>.
+    /// </summary>
+    public string? Meaning { get; set; }
     public bool IsNew { get; set; }
     public bool IsDue { get; set; }
     public bool NeedsArticlePractice { get; set; }

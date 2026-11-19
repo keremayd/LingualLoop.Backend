@@ -23,6 +23,9 @@ public class CreateKartyResponse
     /// <summary>Var olan satır güncellendi mi, yeni satır mı açıldı.</summary>
     public bool Updated { get; set; }
 
+    /// <summary>Kartın yazımdan sonraki bütün anlamları, dile göre (<c>"tr" → "kapı"</c>).</summary>
+    public Dictionary<string, string> Meanings { get; set; } = new();
+
     /// <summary>
     /// Sesin bu çağrıda üretilip üretilmediği. `false` ise
     /// <see cref="Warning"/> sebebi taşıyor.

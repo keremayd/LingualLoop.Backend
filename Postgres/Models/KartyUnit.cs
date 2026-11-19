@@ -5,6 +5,8 @@ namespace Postgres.Models;
 
 /// <summary>
 /// Karty Yolu'nun ünitesi: konulu bir kelime grubu ("Evde", "Yolculuk").
+/// Adı dile göre <see cref="KartyUnitTranslation"/>'da, her dil (Türkçe dahil)
+/// bir satır; bu tabloda dile bağlı kolon yok (16 Kas 2026).
 /// Kelimeler <see cref="Karty.UnitId"/> ve <see cref="Karty.UnitOrder"/> ile
 /// bağlanır; sıradaki ünite, bir öncekinin kelimeleri pekişince açılır
 /// (<c>KartyUnitRules</c>).
@@ -19,9 +21,6 @@ public class KartyUnit
     /// <summary>Patikadaki sırası; 1'den başlar, benzersiz.</summary>
     [Column("sequence")]
     public int Sequence { get; set; }
-
-    [Column("title")]
-    public string Title { get; set; } = string.Empty;
 
     /// <summary>
     /// Ünite başlığındaki 3B görsel olarak kullanılan kart. Ayrı bir görsel

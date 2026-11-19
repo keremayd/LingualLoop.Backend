@@ -40,6 +40,10 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
                 history.Karty.AudioUrl,
                 MinScore = history.Karty.MinScore,
                 MaxScore = history.Karty.MaxScore,
+                Meaning = _context.KartyTranslations
+                    .Where(row => row.KartyId == history.KartyId && row.Locale == request.Locale)
+                    .Select(row => row.Meaning)
+                    .FirstOrDefault(),
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -62,6 +66,7 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
             Article = karty.Article,
             KartyUrl = karty.KartyUrl,
             AudioUrl = karty.AudioUrl,
+            Meaning = karty.Meaning,
             MinScore = karty.MinScore,
             MaxScore = karty.MaxScore,
         };

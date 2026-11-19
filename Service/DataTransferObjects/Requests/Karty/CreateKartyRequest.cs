@@ -44,4 +44,11 @@ public class CreateKartyRequest : IRequest<CreateKartyResponse>
     /// koparır — kelime "hiç görülmemiş" hâle döner.
     /// </summary>
     public bool OverwriteExisting { get; set; }
+
+    /// <summary>
+    /// Kelimenin ana dillerdeki anlamı: <c>{"tr": "kapı", "sq": "derë"}</c>.
+    /// İsteğe bağlı; verilmeyen dile dokunulmaz, boş değer o dildeki anlamı
+    /// siler (<c>KartyTranslationWriter</c>).
+    /// </summary>
+    public Dictionary<string, string?> Meanings { get; set; } = new();
 }

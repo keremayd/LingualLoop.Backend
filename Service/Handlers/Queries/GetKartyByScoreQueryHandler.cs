@@ -53,6 +53,10 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
                     q.AudioUrl,
                     q.MinScore,
                     q.MaxScore,
+                    Meaning = _context.KartyTranslations
+                        .Where(row => row.KartyId == q.KartyId && row.Locale == request.Locale)
+                        .Select(row => row.Meaning)
+                        .FirstOrDefault(),
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -79,6 +83,7 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
             Article = karty.Article,
             KartyUrl = karty.KartyUrl,
             AudioUrl = karty.AudioUrl,
+            Meaning = karty.Meaning,
             MinScore = karty.MinScore,
             MaxScore = karty.MaxScore,
         };

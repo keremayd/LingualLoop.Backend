@@ -5,6 +5,7 @@ using Common.Enums;
 using Common.Exceptions;
 using Common.Extensions;
 using Common.Options;
+using LingualLoop.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +58,7 @@ public class KartyController : ControllerBase
             UnitSequence = unit,
             Deck = deck,
             Reviews = reviews,
+            Locale = Request.NativeLanguage(),
         });
 
         // Yanıt **yeniden kurulmuyor**, yalnız imzalı URL yazılıyor.
@@ -100,7 +102,11 @@ public class KartyController : ControllerBase
         if (!string.Equals(User.Identity?.Name, userId, StringComparison.Ordinal))
             return Forbid();
 
-        var response = await _mediator.Send(new GetKartyPathRequest { UserId = userId });
+        var response = await _mediator.Send(new GetKartyPathRequest
+        {
+            UserId = userId,
+            Locale = Request.NativeLanguage(),
+        });
 
         string Sign(string key) =>
             _amazonService.GeneratePreSignedUrl(key, BucketType.KartyAssets);
@@ -146,6 +152,7 @@ public class KartyController : ControllerBase
             UnitSequence = unit,
             Deck = deck,
             ReviewsAnswered = Math.Max(0, reviews),
+            Locale = Request.NativeLanguage(),
         });
         foreach (var word in response.Words)
         {
@@ -176,7 +183,11 @@ public class KartyController : ControllerBase
     [HttpGet("wrong/random/{userId}")]
     public async Task<ActionResult<ApiResponse<GetKartyByScoreResponse>>> GetRandomWrongKartyByUserId([FromRoute] string userId)
     {
-        var kartyQuestion = await _mediator.Send(new GetWrongKartyReviewRequest { UserId = userId });
+        var kartyQuestion = await _mediator.Send(new GetWrongKartyReviewRequest
+        {
+            UserId = userId,
+            Locale = Request.NativeLanguage(),
+        });
 
         // Yukarıdaki uçla aynı gerekçe: alan alan kopyalamak yerine dönen
         // nesne iletiliyor. Rövanşta tanışma modu zaten oluşmaz (kullanıcı o
@@ -276,6 +287,7 @@ public class KartyController : ControllerBase
                 UnitSequence = form.UnitSequence,
                 UnitOrder = form.UnitOrder,
                 OverwriteExisting = form.OverwriteExisting,
+                Meanings = form.Meanings ?? new(),
                 ImageFileName = form.Image.FileName,
                 ImageContent = buffer.ToArray(),
             },
@@ -285,7 +297,8 @@ public class KartyController : ControllerBase
     }
 
     /// <summary>
-    /// Karty Yolu ünitesini açar ya da adını / başlık görselini değiştirir.
+    /// Karty Yolu ünitesini açar ya da adlarını (dile göre, <c>titles</c>) /
+    /// başlık görselini değiştirir.
     /// Başlık görseli ünitenin kartlarından birinin görseli
     /// (<c>emblemKartyId</c>); ayrı yükleme yok. Kimlik: `X-Karty-Admin-Key`.
     /// </summary>
@@ -298,16 +311,69 @@ public class KartyController : ControllerBase
     {
         EnsureAdminKey();
 
+        // Ad 16 Kas 2026'dan beri yalnız dile göre geliyor. Eski "title"
+        // alanı yok sayılsaydı yeniden adlandırma sessizce hiçbir şey yapmazdı.
+        if (body.Title is not null)
+        {
+            const string problem =
+                "'title' alanı kalktı; ad dile göre verilir: {\"titles\": {\"tr\": \"Evde\"}}";
+            throw new LingualLoopException(
+                ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
+                ErrorCode.KartyPayloadInvalid.GetDescription(problem),
+                HttpStatusCode.BadRequest);
+        }
+
         var response = await _mediator.Send(
             new UpsertKartyUnitRequest
             {
                 Sequence = sequence,
-                Title = body.Title,
                 EmblemKartyId = body.EmblemKartyId,
+                Titles = body.Titles ?? new(),
             },
             cancellationToken);
 
         return Ok(new ApiResponse<UpsertKartyUnitResponse> { Data = response });
+    }
+
+    /// <summary>
+    /// İçerik girişi: bir dildeki kart anlamlarını toplu yazar. Gövde
+    /// <c>{"Tür": "derë", "Fenster": "dritare"}</c>: anahtar kartın Almanca adı,
+    /// boş değer o dildeki anlamı siler. Kimlik: `X-Karty-Admin-Key`.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPut("admin/meanings/{locale}")]
+    public async Task<ActionResult<ApiResponse<UpsertKartyMeaningsResponse>>> UpsertMeanings(
+        [FromRoute] string locale,
+        [FromBody] Dictionary<string, string?> meanings,
+        CancellationToken cancellationToken)
+    {
+        EnsureAdminKey();
+
+        var response = await _mediator.Send(
+            new UpsertKartyMeaningsRequest { Locale = locale, Meanings = meanings },
+            cancellationToken);
+
+        return Ok(new ApiResponse<UpsertKartyMeaningsResponse> { Data = response });
+    }
+
+    /// <summary>
+    /// İçerik girişi: bütün kartlar ve bir dildeki anlamları, patika sırasıyla;
+    /// anlamı olmayanda <c>null</c>. Çeviriyi kontrole göndermek ve eksikleri
+    /// görmek için. Kimlik: `X-Karty-Admin-Key`.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("admin/meanings/{locale}")]
+    public async Task<ActionResult<ApiResponse<GetKartyMeaningsResponse>>> GetMeanings(
+        [FromRoute] string locale,
+        CancellationToken cancellationToken)
+    {
+        EnsureAdminKey();
+
+        var response = await _mediator.Send(
+            new GetKartyMeaningsRequest { Locale = locale },
+            cancellationToken);
+
+        return Ok(new ApiResponse<GetKartyMeaningsResponse> { Data = response });
     }
 
     /// <summary>
@@ -377,11 +443,22 @@ public class CreateKartyForm
     public int? UnitOrder { get; set; }
     public bool OverwriteExisting { get; set; }
     public IFormFile? Image { get; set; }
+
+    /// <summary>
+    /// Ana dillerdeki anlam; form alanı olarak <c>meanings[tr]=kapı</c>,
+    /// <c>meanings[sq]=derë</c>. İsteğe bağlı.
+    /// </summary>
+    public Dictionary<string, string?>? Meanings { get; set; }
 }
 
 /// <summary>Ünite açma / yeniden adlandırma gövdesi.</summary>
 public class UpsertKartyUnitBody
 {
-    public string? Title { get; set; }
     public int? EmblemKartyId { get; set; }
+
+    /// <summary>Dillerdeki ad: <c>{"tr": "Evde", "sq": "Në shtëpi"}</c>.</summary>
+    public Dictionary<string, string?>? Titles { get; set; }
+
+    /// <summary>Kalktı (16 Kas 2026); gönderilirse 400 döner, bkz. <see cref="Titles"/>.</summary>
+    public string? Title { get; set; }
 }

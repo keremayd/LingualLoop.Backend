@@ -31,11 +31,25 @@ public class GetKartyPathQueryHandler
         // Ünite şemasını da garanti eder.
         await KartyLearningSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
+        var locale = request.Locale;
+
+        // Ünite adı kullanıcının dilinde; o dilde yoksa varsayılan dilde, o da
+        // yoksa bulunan ilk dilde (LocaleRules.Default). Tek alt sorgu.
         var units = await _context.KartyUnits
             .AsNoTracking()
             .OrderBy(unit => unit.Sequence)
             .Select(unit => new PathUnit(
-                unit.KartyUnitId, unit.Sequence, unit.Title, unit.EmblemKartyId))
+                unit.KartyUnitId,
+                unit.Sequence,
+                _context.KartyUnitTranslations
+                    .Where(row => row.KartyUnitId == unit.KartyUnitId)
+                    .OrderBy(row => row.Locale == locale
+                        ? 0
+                        : row.Locale == LocaleRules.Default ? 1 : 2)
+                    .ThenBy(row => row.Locale)
+                    .Select(row => row.Title)
+                    .FirstOrDefault() ?? string.Empty,
+                unit.EmblemKartyId))
             .ToListAsync(cancellationToken);
 
         var cards = await _context.Karty
@@ -47,7 +61,11 @@ public class GetKartyPathQueryHandler
                 karty.UnitOrder,
                 karty.NounText,
                 karty.Article,
-                karty.KartyUrl))
+                karty.KartyUrl,
+                _context.KartyTranslations
+                    .Where(row => row.KartyId == karty.KartyId && row.Locale == locale)
+                    .Select(row => row.Meaning)
+                    .FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
         var learnings = await _context.UserKartyLearnings

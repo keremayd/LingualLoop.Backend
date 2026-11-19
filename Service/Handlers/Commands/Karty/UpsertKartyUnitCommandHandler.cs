@@ -14,7 +14,8 @@ using Service.Helpers;
 namespace Service.Handlers.Commands.Karty;
 
 /// <summary>
-/// Karty Yolu ünitesini açar ya da adını ve başlık görselini değiştirir.
+/// Karty Yolu ünitesini açar ya da adlarını (dile göre) ve başlık görselini
+/// değiştirir.
 /// Geçiş döneminde puan bantları geçici adlarla ünite oldu; içerik kararı
 /// verilince adlar SQL'e inmeden buradan değişir.
 /// </summary>
@@ -34,27 +35,27 @@ public class UpsertKartyUnitCommandHandler
         CancellationToken cancellationToken)
     {
         await KartyUnitSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
+        await KartyTranslationSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
 
-        var title = request.Title?.Trim();
         if (request.Sequence < 1) Fail("Ünite sırası 1'den başlar.");
+        var titles = KartyTranslationWriter.Normalize(request.Titles);
+
+        // Yeni ünite ile adları aynı işlemde: ad yazılamazsa adsız ünite kalmasın.
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
         var unit = await _context.KartyUnits
             .FirstOrDefaultAsync(item => item.Sequence == request.Sequence, cancellationToken);
         var created = unit is null;
         if (unit is null)
         {
-            if (string.IsNullOrEmpty(title)) Fail("Yeni ünite için başlık gerekli.");
+            if (!titles.Values.Any(title => title.Length > 0))
+                Fail("Yeni ünite için en az bir dilde ad gerekli: {\"titles\": {\"tr\": \"Evde\"}}.");
             unit = new KartyUnit
             {
                 Sequence = request.Sequence,
-                Title = title!,
                 CreatedDate = DateTime.UtcNow,
             };
             _context.KartyUnits.Add(unit);
-        }
-        else if (!string.IsNullOrEmpty(title))
-        {
-            unit.Title = title;
         }
 
         if (request.EmblemKartyId is int emblemId)
@@ -65,12 +66,17 @@ public class UpsertKartyUnitCommandHandler
             unit.EmblemKartyId = emblemId;
         }
 
+        // Adlar ünitenin id'sine bağlı; yeni ünite önce kaydediliyor.
         await _context.SaveChangesAsync(cancellationToken);
+        var allTitles = await KartyTranslationWriter.SetUnitTitlesAsync(
+            _context, unit, titles, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return new UpsertKartyUnitResponse
         {
             Sequence = unit.Sequence,
-            Title = unit.Title,
+            Titles = allTitles,
             EmblemKartyId = unit.EmblemKartyId,
             WordCount = await _context.Karty
                 .CountAsync(karty => karty.UnitId == unit.KartyUnitId, cancellationToken),

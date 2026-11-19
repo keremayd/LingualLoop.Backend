@@ -23,6 +23,8 @@ public class GetKartyPathResponse
 public class KartyPathUnitResponse
 {
     public int Sequence { get; set; }
+
+    /// <summary>Kullanıcının ana dilinde; o dilde yoksa varsayılan dilde, o da yoksa ilk bulunan dilde (<c>LocaleRules.Default</c>).</summary>
     public string Title { get; set; } = string.Empty;
 
     /// <summary><c>done</c> · <c>current</c> · <c>open</c> · <c>locked</c>.</summary>
@@ -74,6 +76,12 @@ public class KartyPathWordResponse
     public string NounText { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
     public string KartyUrl { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Kelimenin kullanıcının ana dilindeki anlamı (<c>karty_translation</c>);
+    /// o dilde girilmemişse <c>null</c>.
+    /// </summary>
+    public string? Meaning { get; set; }
     public int Box { get; set; }
     public bool IsDue { get; set; }
 }

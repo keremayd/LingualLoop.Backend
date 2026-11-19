@@ -76,6 +76,10 @@ public class GetWordCollectionQueryHandler
                 Article = item.Karty.Article,
                 KartyUrl = item.Karty.KartyUrl,
                 AudioUrl = item.Karty.AudioUrl,
+                Meaning = _context.KartyTranslations
+                    .Where(row => row.KartyId == item.KartyId && row.Locale == request.Locale)
+                    .Select(row => row.Meaning)
+                    .FirstOrDefault(),
                 IsNew = item.CorrectCount == 0,
                 // KartyLeitner.DueForReview'ın SQL'e çevrilen hâli; projeksiyon
                 // içinde ifade ağacı kullanılamıyor.
