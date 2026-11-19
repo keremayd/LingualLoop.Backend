@@ -7,6 +7,7 @@ using LingualLoop.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Service.DataTransferObjects.Requests;
 using Service.DataTransferObjects.Requests.Karty;
 using Service.DataTransferObjects.Requests.Profile;
@@ -119,16 +120,25 @@ public class UserController : ControllerBase
     /// <summary>
     /// Hesabı ve bütün verisini kalıcı olarak siler. Yalnız hesabın sahibi
     /// silebilir: yoldaki kimlik token'daki kullanıcıyla aynı olmalı.
+    /// Apple ile bağlı hesapta gövde Apple'ın yetki kodunu taşır; yoksa
+    /// E4130 döner (bkz. <see cref="DeleteAccountCommandHandler"/>). Gövde
+    /// isteğe bağlı: eski istemci göndermez.
     /// </summary>
     [Authorize]
     [HttpDelete("{id}/account")]
     public async Task<ActionResult<ApiResponse<DeleteAccountResponse>>> DeleteAccount(
-        [FromRoute] string id)
+        [FromRoute] string id,
+        [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] DeleteAccountBody? body)
     {
         if (!string.Equals(User.Identity?.Name, id, StringComparison.Ordinal))
             return Forbid();
 
-        var response = await _mediator.Send(new DeleteAccountRequest { UserId = id });
+        var response = await _mediator.Send(new DeleteAccountRequest
+        {
+            UserId = id,
+            AppleAuthorizationCode = body?.AppleAuthorizationCode,
+            SkipAppleRevocation = body?.SkipAppleRevocation ?? false,
+        });
         return Ok(new ApiResponse<DeleteAccountResponse> { Data = response });
     }
 

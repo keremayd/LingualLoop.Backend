@@ -90,4 +90,7 @@ public enum ErrorCode
 
     [Description("Desteklenmeyen dil! dil = {0}, desteklenenler = {1}")]
     UnsupportedLanguage = 4129,
+
+    [Description("Apple ile bağlı hesap silinirken Apple onayı gerekiyor! userid = {0}")]
+    AppleConsentRequired = 4130,
 }

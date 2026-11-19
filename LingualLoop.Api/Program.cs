@@ -39,6 +39,8 @@ builder.Services.Configure<KartyAdminOptions>(
 builder.Services.Configure<AppleOptions>(
     builder.Configuration.GetSection(AppleOptions.SectionName));
 builder.Services.AddSingleton<Service.Helpers.AppleIdentityValidator>();
+// Hesap silinirken Apple'daki izni geri alır; anahtar appsettings.Local.json'da.
+builder.Services.AddSingleton<Service.Helpers.AppleTokenRevoker>();
 
 builder.Services.AddCors(options =>
 {
