@@ -71,15 +71,29 @@ public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRe
             leagueQuery,
             request.UserId,
             leagueProgress,
+            DefaultDisplayNames.GetValueOrDefault(request.Locale)
+                ?? DefaultDisplayNames[LocaleRules.Default],
             cancellationToken);
 
         return leagueProgress;
     }
 
+    /// <summary>
+    /// Adı olmayan oyuncunun sıralamadaki adı, okuyanın ana dilinde.
+    /// Arnavutçası ana dili Arnavutça olan biri tarafından kontrol edilmeli.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string> DefaultDisplayNames =
+        new Dictionary<string, string>
+        {
+            ["tr"] = "Gökyüzü Gezgini",
+            ["sq"] = "Udhëtar i Qiellit",
+        };
+
     private async Task<List<LeagueLeaderboardEntryResponse>> BuildLeaderboardAsync(
         IQueryable<UserLeagueProgress> leagueQuery,
         string userId,
         LeagueProgressResponse leagueProgress,
+        string defaultDisplayName,
         CancellationToken cancellationToken)
     {
         const int maxEntries = 30;
@@ -109,7 +123,7 @@ public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRe
                     Rank = index + 1,
                     UserId = row.UserId,
                     DisplayName = string.IsNullOrWhiteSpace(displayName)
-                        ? "Gökyüzü Gezgini"
+                        ? defaultDisplayName
                         : displayName,
                     Points = row.Points,
                     IsCurrentUser = row.UserId == userId,
@@ -133,7 +147,7 @@ public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRe
                 Rank = leagueProgress.LeaderboardRank ?? entries.Count + 1,
                 UserId = userId,
                 DisplayName = string.IsNullOrWhiteSpace(currentDisplayName)
-                    ? "Gökyüzü Gezgini"
+                    ? defaultDisplayName
                     : currentDisplayName,
                 Points = leagueProgress.Points,
                 IsCurrentUser = true,

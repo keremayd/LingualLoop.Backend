@@ -44,7 +44,7 @@ public class GetDailyQuestsQueryHandler : IRequestHandler<GetDailyQuestsRequest,
             quests.Add(new DailyQuestResponse
             {
                 QuestKey = definition.Key,
-                Title = definition.Title,
+                Title = definition.TitleIn(request.Locale),
                 Target = definition.Target,
                 Progress = clampedProgress,
                 RewardTickets = definition.RewardTickets,

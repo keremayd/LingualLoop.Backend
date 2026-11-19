@@ -1,3 +1,4 @@
+using LingualLoop.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ public class QuestController : ControllerBase
     public async Task<ActionResult<ApiResponse<GetDailyQuestsResponse>>> GetDailyQuests(
         [FromRoute] string userId)
     {
-        var response = await _mediator.Send(new GetDailyQuestsRequest { UserId = userId });
+        var response = await _mediator.Send(new GetDailyQuestsRequest { UserId = userId, Locale = Request.NativeLanguage() });
 
         return Ok(new ApiResponse<GetDailyQuestsResponse>()
         {

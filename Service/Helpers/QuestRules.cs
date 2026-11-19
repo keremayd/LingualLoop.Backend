@@ -19,11 +19,20 @@ namespace Service.Helpers;
 /// </summary>
 public static class QuestRules
 {
+    /// <param name="TitleKey">
+    /// Başlığın şablonu (<see cref="QuestTitles"/>). Görev anahtarından ayrı:
+    /// aynı görevin başlığı duruma göre değişiyor ("Serini sürdür" /
+    /// "Serini başlat") ve hedef sayısı başlığın içinde.
+    /// </param>
     public sealed record QuestDefinition(
         string Key,
-        string Title,
+        string TitleKey,
         int Target,
-        int RewardTickets);
+        int RewardTickets)
+    {
+        /// <summary>Kullanıcının ana dilinde başlık; şablonu olmayan dilde varsayılan dilde.</summary>
+        public string TitleIn(string locale) => QuestTitles.Format(TitleKey, locale, Target);
+    }
 
     /// <summary>Görev seçiminin baktığı durum.</summary>
     /// <param name="NewWords">Bugün tanışılabilecek yeni kelime: açık ünitelerde görülmemişler + bugün tanışılanlar.</param>
@@ -42,12 +51,12 @@ public static class QuestRules
     // toplam 10 bilet, tek seferde en fazla 3. Ödül tavanı aşamadığı için tek
     // bir ödülün tavanın yanında büyük kalmaması gerekir; aksi hâlde tavana
     // yakın oyuncunun ödülü boşa gider.
-    private static readonly QuestDefinition CheckIn = new("checkin", "Güne başla", 1, 1);
-    private static readonly QuestDefinition CorrectFive = new("correct_five", "5 kelimeyi doğru bil", 5, 2);
-    private static readonly QuestDefinition LearnThree = new("learn_three", "3 yeni kelime öğren", 3, 2);
-    private static readonly QuestDefinition CorrectEight = new("correct_eight", "8 kelimeyi doğru bil", 8, 2);
-    private static readonly QuestDefinition ArticleThree = new("article_three", "3 artikeli doğru bil", 3, 2);
-    private static readonly QuestDefinition CorrectTen = new("correct_ten", "10 kelimeyi doğru bil", 10, 2);
+    private static readonly QuestDefinition CheckIn = new("checkin", "checkin", 1, 1);
+    private static readonly QuestDefinition CorrectFive = new("correct_five", "correct_n", 5, 2);
+    private static readonly QuestDefinition LearnThree = new("learn_three", "learn_n", 3, 2);
+    private static readonly QuestDefinition CorrectEight = new("correct_eight", "correct_n", 8, 2);
+    private static readonly QuestDefinition ArticleThree = new("article_three", "article_n", 3, 2);
+    private static readonly QuestDefinition CorrectTen = new("correct_ten", "correct_n", 10, 2);
 
     /// <summary>Rövanş görevinin en yüksek hedefi; bekleyen kart azsa onunla sınırlıdır.</summary>
     private const int MaxReviewTarget = 2;
@@ -55,11 +64,11 @@ public static class QuestRules
     private static QuestDefinition ReviewQuest(int pendingReviews)
     {
         var target = Math.Clamp(pendingReviews, 1, MaxReviewTarget);
-        return new QuestDefinition("review_two", $"{target} rövanş kartını geri kazan", target, 2);
+        return new QuestDefinition("review_two", "review_n", target, 2);
     }
 
     private static QuestDefinition StreakQuest(bool hadStreak) =>
-        new("streak_keep", hadStreak ? "Serini sürdür" : "Serini başlat", 1, 3);
+        new("streak_keep", hadStreak ? "streak_continue" : "streak_start", 1, 3);
 
     /// <summary>
     /// Günün görevleri, yuva sırasıyla. Ödülü alınmış seçenek durum değişse de

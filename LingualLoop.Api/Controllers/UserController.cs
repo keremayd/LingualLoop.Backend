@@ -220,7 +220,7 @@ public class UserController : ControllerBase
         
         var getLivesByIdResponse = await _mediator.Send(new GetLivesByIdRequest() { UserId = id });
 
-        var getLeagueByUserIdResponse = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id });
+        var getLeagueByUserIdResponse = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id, Locale = Request.NativeLanguage() });
 
         var getStreakResponse = await _mediator.Send(new GetStreakByIdRequest() { UserId = id });
 
@@ -252,7 +252,7 @@ public class UserController : ControllerBase
     [HttpGet("{id}/league")]
     public async Task<ActionResult<ApiResponse<LeagueProgressResponse>>> GetLeagueByUserId([FromRoute] string id)
     {
-        var response = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id });
+        var response = await _mediator.Send(new GetLeagueByUserIdRequest() { UserId = id, Locale = Request.NativeLanguage() });
 
         return Ok(new ApiResponse<LeagueProgressResponse>()
         {
