@@ -63,6 +63,28 @@ public class UserController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Ana dilin kaydı ("tr", "sq"). Uygulama dili değiştirdiğinde ve girişten
+    /// sonra bir kez gönderir. Yalnız token sahibi.
+    /// </summary>
+    [Authorize]
+    [HttpPut("{id}/language")]
+    public async Task<ActionResult<ApiResponse<UpdateUserLanguageResponse>>> UpdateLanguage(
+        [FromRoute] string id,
+        [FromBody] UpdateUserLanguageBody body)
+    {
+        if (!string.Equals(User.Identity?.Name, id, StringComparison.Ordinal))
+            return Forbid();
+
+        var response = await _mediator.Send(new UpdateUserLanguageRequest
+        {
+            UserId = id,
+            NativeLanguage = body.NativeLanguage,
+        });
+
+        return Ok(new ApiResponse<UpdateUserLanguageResponse> { Data = response });
+    }
+
     [Authorize]
     [HttpGet("{id}/word-collection")]
     public async Task<ActionResult<ApiResponse<GetWordCollectionResponse>>> GetWordCollection(
@@ -281,4 +303,10 @@ public class UserController : ControllerBase
             } 
         });
     }
+}
+
+/// <summary>Ana dil gövdesi: <c>{"nativeLanguage": "sq"}</c>.</summary>
+public class UpdateUserLanguageBody
+{
+    public string NativeLanguage { get; set; } = string.Empty;
 }
