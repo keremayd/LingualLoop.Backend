@@ -99,4 +99,7 @@ public enum ErrorCode
 
     [Description("Geçersiz bildirim sebebi! sebep = {0}")]
     ReportReasonInvalid = 4132,
+
+    [Description("Apple işlemi doğrulanamadı! sebep = {0}")]
+    AppleTransactionInvalid = 4133,
 }

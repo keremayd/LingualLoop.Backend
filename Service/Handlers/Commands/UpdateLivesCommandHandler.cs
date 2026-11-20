@@ -39,6 +39,20 @@ public class UpdateLivesCommandHandler : IRequestHandler<UpdateLivesRequest, Upd
         // yazmayı reddediyor; okunan değer her durumda UTC işaretlenir.
         userLives.LastLivesResetTime = DateTime.SpecifyKind(userLives.LastLivesResetTime, DateTimeKind.Utc);
 
+        // Premium üyenin bileti sınırsız: oyuna girer, bilet harcanmaz.
+        var premiumUntil = await PremiumStatus.PremiumUntilAsync(_context, request.UserId, cancellationToken);
+        if (PremiumRules.IsPremium(premiumUntil, utcNow))
+        {
+            return new UpdateLivesResponse()
+            {
+                UserId = request.UserId,
+                Lives = userLives.Lives,
+                MaxLives = userLives.MaxLives,
+                Spent = true,
+                NextTicketAt = userLives.Lives < userLives.MaxLives ? userLives.LastLivesResetTime : null,
+            };
+        }
+
         // Bilet yoksa harcama yapılmaz. Eskiden koşulsuz "Lives -= 1"
         // uygulanıyordu; bakiye eksiye düşüyor ve biletsiz oyun oynanabiliyordu.
         if (userLives.Lives <= 0)

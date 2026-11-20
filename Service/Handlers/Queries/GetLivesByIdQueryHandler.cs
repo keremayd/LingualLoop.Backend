@@ -41,8 +41,12 @@ public class GetLivesByIdQueryHandler : IRequestHandler<GetLivesByIdRequest, Get
             throw new StelindaException(ErrorCode.NoDataFoundInUserLives.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInUserLives.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
+        var premiumUntil = await PremiumStatus.PremiumUntilAsync(_context, request.UserId, cancellationToken);
+
         return new GetLivesByIdResponse()
         {
+            IsPremium = PremiumRules.IsPremium(premiumUntil, DateTime.UtcNow),
+            PremiumUntil = premiumUntil,
             UserId = userLives.UserId,
             Lives = userLives.Lives,
             MaxLives = userLives.MaxLives,

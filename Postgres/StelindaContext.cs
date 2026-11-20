@@ -38,6 +38,7 @@ public class StelindaContext : IdentityDbContext<User>
     public DbSet<UserQuestClaim> UserQuestClaims { get; set; }
     public DbSet<UserBlock> UserBlocks { get; set; }
     public DbSet<UserReport> UserReports { get; set; }
+    public DbSet<AppleSubscription> AppleSubscriptions { get; set; }
     public DbSet<UserPremium> UserPremiums { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
 }

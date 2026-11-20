@@ -254,7 +254,9 @@ public class UserController : ControllerBase
                 LongestStreak = getStreakResponse.LongestStreak,
                 FreezeCount = getStreakResponse.FreezeCount,
                 PlayedToday = getStreakResponse.PlayedToday,
-                StreakWeek = getStreakResponse.Week
+                StreakWeek = getStreakResponse.Week,
+                IsPremium = getLivesByIdResponse.IsPremium,
+                PremiumUntil = getLivesByIdResponse.PremiumUntil,
             }
         });
     }

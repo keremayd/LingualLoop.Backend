@@ -51,4 +51,8 @@ public class GetScoreWithLivesByIdResponse
 
     /// <summary>Son yedi gün; ana ekrandaki seri şeridi için.</summary>
     public List<StreakDayResponse> StreakWeek { get; set; } = new();
+
+    /// Premium üyenin bileti sınırsız (oyuna girerken bilet düşmez).
+    public bool IsPremium { get; set; }
+    public DateTime? PremiumUntil { get; set; }
 }
