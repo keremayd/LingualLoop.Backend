@@ -9,7 +9,7 @@ namespace Stelinda.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("ll-api/quests")]
+[Route("api/quests")]
 public class QuestController : ControllerBase
 {
     private readonly IMediator _mediator;

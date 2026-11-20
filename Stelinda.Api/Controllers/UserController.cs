@@ -19,7 +19,7 @@ namespace Stelinda.Api.Controllers;
 
 //[Authorize]
 [ApiController]
-[Route("ll-api/users")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;

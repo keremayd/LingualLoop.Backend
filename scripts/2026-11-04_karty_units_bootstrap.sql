@@ -7,7 +7,7 @@
 --
 -- İdempotent: üniteler zaten varsa yeniden açılmaz, ünitesi olan karta
 -- dokunulmaz, hiçbir satır silinmez. Adları sonradan değiştirmek için:
--- PUT ll-api/karty/admin/units/{sequence}.
+-- PUT api/karty/admin/units/{sequence}.
 
 BEGIN;
 

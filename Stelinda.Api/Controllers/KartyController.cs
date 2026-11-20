@@ -17,7 +17,7 @@ using Service.DataTransferObjects.Responses.Karty;
 namespace Stelinda.Api.Controllers;
 
 [ApiController]
-[Route("ll-api/karty")]
+[Route("api/karty")]
 public class KartyController : ControllerBase
 {
     private readonly IMediator _mediator;

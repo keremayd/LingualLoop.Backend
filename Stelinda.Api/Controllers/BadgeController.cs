@@ -6,7 +6,7 @@ using Service.DataTransferObjects.Responses.Badge;
 namespace Stelinda.Api.Controllers;
 
 [ApiController]
-[Route("ll-api/badges")]
+[Route("api/badges")]
 public class BadgeController : ControllerBase
 {
     private readonly IMediator _mediator;

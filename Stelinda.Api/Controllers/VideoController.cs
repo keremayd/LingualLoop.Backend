@@ -13,7 +13,7 @@ using Service.Handlers.Commands;
 namespace Stelinda.Api.Controllers;
 
 [ApiController]
-[Route("ll-api/videos")]
+[Route("api/videos")]
 public class VideoController : ControllerBase
 {
     private readonly IMediator _mediator;

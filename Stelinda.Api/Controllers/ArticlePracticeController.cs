@@ -10,7 +10,7 @@ namespace Stelinda.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("ll-api/article-practice")]
+[Route("api/article-practice")]
 public class ArticlePracticeController : ControllerBase
 {
     private readonly IMediator _mediator;

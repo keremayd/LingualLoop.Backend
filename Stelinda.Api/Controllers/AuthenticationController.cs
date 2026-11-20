@@ -18,7 +18,7 @@ using Service.Handlers.Commands;
 namespace Stelinda.Api.Controllers;
 
 [ApiController]
-[Route("ll-api/authentication")]
+[Route("api/authentication")]
 public class AuthenticationController : ControllerBase
 {
     private readonly IMediator _mediator;
