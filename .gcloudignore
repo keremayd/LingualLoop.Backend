@@ -1,0 +1,8 @@
+# Sırlar ve derleme çıktıları imaja girmez; ayarlar Cloud Run'da ortam
+# değişkeni ve Secret Manager'dan gelir.
+**/appsettings.Local.json
+**/bin/
+**/obj/
+**/.idea/
+**/*.user
+.git
