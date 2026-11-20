@@ -98,10 +98,15 @@ public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRe
     {
         const int maxEntries = 30;
 
+        // Engellenen ve engelleyen kullanıcılar sıralamada görünmez; sıra
+        // numaraları gerçek kalır (gizlenenler kadar fazla satır alınır).
+        var hidden = await UserModerationSchemaHelper.HiddenUserIdsAsync(
+            _context, userId, cancellationToken);
+
         var rows = await leagueQuery
             .OrderByDescending(p => p.Points)
             .ThenBy(p => p.UserId)
-            .Take(maxEntries)
+            .Take(maxEntries + hidden.Count)
             .Select(p => new { p.UserId, p.Points })
             .ToListAsync(cancellationToken);
 
@@ -130,6 +135,8 @@ public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRe
                     ProfilePhotoUrl = _buildPhotoUrl(name?.ProfilePhoto),
                 };
             })
+            .Where(entry => !hidden.Contains(entry.UserId))
+            .Take(maxEntries)
             .ToList();
 
         if (!entries.Any(e => e.IsCurrentUser))

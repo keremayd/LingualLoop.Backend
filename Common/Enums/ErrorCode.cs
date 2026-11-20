@@ -93,4 +93,10 @@ public enum ErrorCode
 
     [Description("Apple ile bağlı hesap silinirken Apple onayı gerekiyor! userid = {0}")]
     AppleConsentRequired = 4130,
+
+    [Description("Geçersiz hedef kullanıcı! hedef = {0}")]
+    ModerationTargetInvalid = 4131,
+
+    [Description("Geçersiz bildirim sebebi! sebep = {0}")]
+    ReportReasonInvalid = 4132,
 }
