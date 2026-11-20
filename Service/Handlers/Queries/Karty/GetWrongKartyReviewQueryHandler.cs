@@ -15,9 +15,9 @@ namespace Service.Handlers.Queries.Karty;
 
 public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyReviewRequest, GetKartyByScoreResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public GetWrongKartyReviewQueryHandler(ILingualLoopGenericRepository<UserKartyHistory> userKartyHistoryRepository)
+    public GetWrongKartyReviewQueryHandler(IStelindaGenericRepository<UserKartyHistory> userKartyHistoryRepository)
     {
         _context = userKartyHistoryRepository.GetDbContext();
     }
@@ -49,7 +49,7 @@ public class GetWrongKartyReviewQueryHandler : IRequestHandler<GetWrongKartyRevi
 
         if (karty is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataFoundInKarty.CreateMessage(0),
+            throw new StelindaException(ErrorCode.NoDataFoundInKarty.CreateMessage(0),
                 ErrorCode.NoDataFoundInKarty.GetDescription(0), HttpStatusCode.BadRequest);
         }
 

@@ -50,7 +50,7 @@ public static class KartyTranslationWriter
     }
 
     public static string RequireLocale(string? code) =>
-        LocaleRules.Normalize(code) ?? throw new LingualLoopException(
+        LocaleRules.Normalize(code) ?? throw new StelindaException(
             ErrorCode.UnsupportedLanguage.CreateMessage(code, string.Join(", ", LocaleRules.Supported)),
             ErrorCode.UnsupportedLanguage.GetDescription(code, string.Join(", ", LocaleRules.Supported)),
             HttpStatusCode.BadRequest);
@@ -60,7 +60,7 @@ public static class KartyTranslationWriter
     /// yazımdan sonraki bütün anlamlarını döner; çağıran yanıtta gösterir.
     /// </summary>
     public static async Task<Dictionary<string, string>> SetMeaningsAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         int kartyId,
         IReadOnlyDictionary<string, string> meanings,
         CancellationToken cancellationToken)
@@ -108,7 +108,7 @@ public static class KartyTranslationWriter
     /// adını döner.
     /// </summary>
     public static async Task<Dictionary<string, string>> SetUnitTitlesAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         KartyUnit unit,
         IReadOnlyDictionary<string, string> titles,
         CancellationToken cancellationToken)
@@ -151,7 +151,7 @@ public static class KartyTranslationWriter
         return rows.ToDictionary(row => row.Locale, row => row.Title);
     }
 
-    private static LingualLoopException PayloadInvalid(string problem) =>
+    private static StelindaException PayloadInvalid(string problem) =>
         new(
             ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
             ErrorCode.KartyPayloadInvalid.GetDescription(problem),

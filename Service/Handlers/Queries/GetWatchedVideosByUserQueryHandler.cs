@@ -13,10 +13,10 @@ namespace Service.Handlers.Queries;
 
 public class GetWatchedVideosByUserQueryHandler : IRequestHandler<GetWatchedVideosByUserRequest, GetWatchedVideosByUserResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
 
-    public GetWatchedVideosByUserQueryHandler(ILingualLoopGenericRepository<User> genericRepository)
+    public GetWatchedVideosByUserQueryHandler(IStelindaGenericRepository<User> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();
@@ -29,7 +29,7 @@ public class GetWatchedVideosByUserQueryHandler : IRequestHandler<GetWatchedVide
         
         if (user is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
                 ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         

@@ -16,10 +16,10 @@ namespace Service.Handlers.Queries.Karty;
 public class GetKartyPathQueryHandler
     : IRequestHandler<GetKartyPathRequest, GetKartyPathResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public GetKartyPathQueryHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> learningRepository)
+        IStelindaGenericRepository<UserKartyLearning> learningRepository)
     {
         _context = learningRepository.GetDbContext();
     }

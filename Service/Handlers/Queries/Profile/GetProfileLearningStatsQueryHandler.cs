@@ -14,10 +14,10 @@ public class GetProfileLearningStatsQueryHandler
 {
     private const int ArticleLearningGoal = KartyLeitner.ArticleLearningGoal;
 
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public GetProfileLearningStatsQueryHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> userKartyLearningRepository)
+        IStelindaGenericRepository<UserKartyLearning> userKartyLearningRepository)
     {
         _context = userKartyLearningRepository.GetDbContext();
     }

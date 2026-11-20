@@ -13,11 +13,11 @@ namespace Service.Handlers.Queries;
 
 public class GetLeagueByUserIdQueryHandler : IRequestHandler<GetLeagueByUserIdRequest, LeagueProgressResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
     private readonly IAwsService _awsService;
 
     public GetLeagueByUserIdQueryHandler(
-        ILingualLoopGenericRepository<User> userRepository,
+        IStelindaGenericRepository<User> userRepository,
         IAwsService awsService)
     {
         _context = userRepository.GetDbContext();

@@ -16,9 +16,9 @@ namespace Service.Handlers.Commands;
 public class ClaimQuestFreezeCommandHandler
     : IRequestHandler<ClaimQuestFreezeRequest, ClaimQuestFreezeResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public ClaimQuestFreezeCommandHandler(ILingualLoopGenericRepository<User> userRepository)
+    public ClaimQuestFreezeCommandHandler(IStelindaGenericRepository<User> userRepository)
     {
         _context = userRepository.GetDbContext();
     }

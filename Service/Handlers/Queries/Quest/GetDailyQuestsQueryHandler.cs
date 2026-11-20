@@ -11,9 +11,9 @@ namespace Service.Handlers.Queries;
 
 public class GetDailyQuestsQueryHandler : IRequestHandler<GetDailyQuestsRequest, GetDailyQuestsResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public GetDailyQuestsQueryHandler(ILingualLoopGenericRepository<User> userRepository)
+    public GetDailyQuestsQueryHandler(IStelindaGenericRepository<User> userRepository)
     {
         _context = userRepository.GetDbContext();
     }

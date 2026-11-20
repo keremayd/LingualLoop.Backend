@@ -14,10 +14,10 @@ public class GetArticlePracticeTaskQueryHandler
 {
     private const int RequiredWordCount = 2;
     private const int LearningGoal = KartyLeitner.ArticleLearningGoal;
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public GetArticlePracticeTaskQueryHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> learningRepository)
+        IStelindaGenericRepository<UserKartyLearning> learningRepository)
     {
         _context = learningRepository.GetDbContext();
     }

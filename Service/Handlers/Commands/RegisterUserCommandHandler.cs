@@ -40,7 +40,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
                 ErrorDescription = error.Description
             }).ToList();
 
-            throw new LingualLoopException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
+            throw new StelindaException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
                 ErrorCode.TheUserNotCreatedInDatabase.GetDescription(), HttpStatusCode.BadRequest);
         }
         
@@ -54,7 +54,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserRequest, R
             ErrorDescription = error.Description
         }).ToList();
 
-        throw new LingualLoopException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
+        throw new StelindaException(ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName), errorList,
             ErrorCode.TheUserNotCreatedInDatabase.GetDescription(), HttpStatusCode.BadRequest);
     }
 

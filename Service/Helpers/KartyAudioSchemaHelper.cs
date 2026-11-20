@@ -20,7 +20,7 @@ public static class KartyAudioSchemaHelper
     /// Kolonu açar. **Veriye dokunmaz** — idempotent, yalnız şema.
     /// </summary>
     public static async Task EnsureCreatedAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         CancellationToken cancellationToken)
     {
         if (_ensured) return;
@@ -76,7 +76,7 @@ public static class KartyAudioSchemaHelper
     /// dosyaları silmez.
     /// </summary>
     public static async Task NormalizeLegacyPathsAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         CancellationToken cancellationToken)
     {
         if (_normalized) return;

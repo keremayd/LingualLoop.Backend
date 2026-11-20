@@ -15,10 +15,10 @@ namespace Service.Handlers.Queries;
 
 public class GetLivesByIdQueryHandler : IRequestHandler<GetLivesByIdRequest, GetLivesByIdResponse>
 {
-    private readonly ILingualLoopGenericRepository<UserLives> _userLivesRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<UserLives> _userLivesRepository;
+    private readonly StelindaContext _context;
 
-    public GetLivesByIdQueryHandler(ILingualLoopGenericRepository<UserLives> userLivesRepository)
+    public GetLivesByIdQueryHandler(IStelindaGenericRepository<UserLives> userLivesRepository)
     {
         _userLivesRepository = userLivesRepository;
         _context = userLivesRepository.GetDbContext();
@@ -38,7 +38,7 @@ public class GetLivesByIdQueryHandler : IRequestHandler<GetLivesByIdRequest, Get
         var userLives = await _userLivesRepository.FirstAsync(u => u.UserId == request.UserId,
             user => new UserLives() { UserLivesId = user.UserLivesId, UserId = user.UserId, Lives = user.Lives, MaxLives = user.MaxLives, LastLivesResetTime = user.LastLivesResetTime});
         if (userLives is null)
-            throw new LingualLoopException(ErrorCode.NoDataFoundInUserLives.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataFoundInUserLives.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInUserLives.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         return new GetLivesByIdResponse()

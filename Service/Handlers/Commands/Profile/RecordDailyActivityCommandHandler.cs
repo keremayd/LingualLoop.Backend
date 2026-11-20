@@ -26,10 +26,10 @@ public class RecordDailyActivityCommandHandler
 {
     private static readonly SemaphoreSlim CheckInLock = new(1, 1);
 
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public RecordDailyActivityCommandHandler(
-        ILingualLoopGenericRepository<UserDailyActivity> userDailyActivityRepository)
+        IStelindaGenericRepository<UserDailyActivity> userDailyActivityRepository)
     {
         _context = userDailyActivityRepository.GetDbContext();
     }

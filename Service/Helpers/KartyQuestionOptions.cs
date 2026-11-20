@@ -24,7 +24,7 @@ public static class KartyQuestionOptions
     /// yeterli görsel yoksa soru artikele döner.
     /// </summary>
     public static async Task<KartyCardMode> FillAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         GetKartyByScoreResponse question,
         KartyCardMode mode,
@@ -37,7 +37,7 @@ public static class KartyQuestionOptions
     }
 
     private static async Task<List<KartyOptionResponse>> BuildAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         GetKartyByScoreResponse question,
         CancellationToken cancellationToken)

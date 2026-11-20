@@ -28,7 +28,7 @@ public static class StreakActivityRecorder
     /// yapılmıyor.
     /// </summary>
     public static async Task MarkPlayedAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         CancellationToken cancellationToken)
@@ -100,7 +100,7 @@ public static class StreakActivityRecorder
     /// (bildirimden derin bağlantı gibi), o yüzden satırın varlığına güvenilmez.
     /// </summary>
     private static async Task EnsurePlayedRowAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateOnly today,
         DateTime utcNow,

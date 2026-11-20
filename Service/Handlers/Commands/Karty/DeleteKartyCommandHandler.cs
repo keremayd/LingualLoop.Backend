@@ -44,12 +44,12 @@ namespace Service.Handlers.Commands.Karty;
 /// </summary>
 public class DeleteKartyCommandHandler : IRequestHandler<DeleteKartyRequest, DeleteKartyResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
     private readonly IAwsService _awsService;
     private readonly ILogger<DeleteKartyCommandHandler> _logger;
 
     public DeleteKartyCommandHandler(
-        ILingualLoopGenericRepository<KartyModel> kartyRepository,
+        IStelindaGenericRepository<KartyModel> kartyRepository,
         IAwsService awsService,
         ILogger<DeleteKartyCommandHandler> logger)
     {
@@ -78,7 +78,7 @@ public class DeleteKartyCommandHandler : IRequestHandler<DeleteKartyRequest, Del
             .CountAsync(item => item.KartyId == kartyId, cancellationToken);
         if ((learningCount > 0 || historyCount > 0) && !request.Force)
         {
-            throw new LingualLoopException(
+            throw new StelindaException(
                 ErrorCode.KartyHasUserProgress.CreateMessage(kartyId, learningCount, historyCount),
                 ErrorCode.KartyHasUserProgress.GetDescription(kartyId, learningCount, historyCount),
                 HttpStatusCode.Conflict);
@@ -146,7 +146,7 @@ public class DeleteKartyCommandHandler : IRequestHandler<DeleteKartyRequest, Del
         return response;
     }
 
-    private static LingualLoopException NotFound(int kartyId) =>
+    private static StelindaException NotFound(int kartyId) =>
         new(ErrorCode.KartyNotFound.CreateMessage(kartyId),
             ErrorCode.KartyNotFound.GetDescription(kartyId),
             HttpStatusCode.NotFound);

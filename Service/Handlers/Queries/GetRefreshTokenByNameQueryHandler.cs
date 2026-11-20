@@ -59,7 +59,7 @@ public class GetRefreshTokenByNameQueryHandler : IRequestHandler<RefreshTokenReq
         var user = await _userManager.FindByIdAsync(principal.Identity.Name);
 
         if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            throw new LingualLoopException(ErrorCode.InvalidOrExpiredRefreshToken.CreateMessage(request.RefreshToken),
+            throw new StelindaException(ErrorCode.InvalidOrExpiredRefreshToken.CreateMessage(request.RefreshToken),
                 ErrorCode.InvalidOrExpiredRefreshToken.GetDescription(request.RefreshToken), HttpStatusCode.Forbidden);
 
         return user;

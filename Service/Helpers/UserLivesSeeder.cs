@@ -15,7 +15,7 @@ namespace Service.Helpers;
 public static class UserLivesSeeder
 {
     public static async Task<UserLives> GetOrCreateAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         CancellationToken cancellationToken)

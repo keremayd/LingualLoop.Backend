@@ -12,9 +12,9 @@ namespace Service.Handlers.Queries.Video;
 
 public class GetSavedVideosByIdQueryHandler : IRequestHandler<GetSavedVideosByIdRequest, List<GetSavedVideosByIdResponse>>
 {
-    private readonly ILingualLoopGenericRepository<UserVideo> _userVideoRepository;
+    private readonly IStelindaGenericRepository<UserVideo> _userVideoRepository;
 
-    public GetSavedVideosByIdQueryHandler(ILingualLoopGenericRepository<UserVideo> userVideoRepository)
+    public GetSavedVideosByIdQueryHandler(IStelindaGenericRepository<UserVideo> userVideoRepository)
     {
         _userVideoRepository = userVideoRepository;
     }
@@ -33,7 +33,7 @@ public class GetSavedVideosByIdQueryHandler : IRequestHandler<GetSavedVideosById
         );
 
         if (videoList is null || !videoList.Any())
-            throw new LingualLoopException(ErrorCode.NoDataFoundInUserVideo.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataFoundInUserVideo.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInUserVideo.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         return videoList.Select(b => new GetSavedVideosByIdResponse

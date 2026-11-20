@@ -17,7 +17,7 @@ public static class UserScoreSchemaHelper
     private static bool _isReady;
 
     public static async Task EnsureCreatedAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         CancellationToken cancellationToken)
     {
         if (_isReady) return;

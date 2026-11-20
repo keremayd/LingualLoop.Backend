@@ -14,10 +14,10 @@ namespace Service.Handlers.Queries;
 
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdRequest, GetUserByIdResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
 
-    public GetUserByIdQueryHandler(ILingualLoopGenericRepository<User> genericRepository)
+    public GetUserByIdQueryHandler(IStelindaGenericRepository<User> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();
@@ -30,7 +30,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdRequest, GetUs
         
         if (user is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
                 ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
         

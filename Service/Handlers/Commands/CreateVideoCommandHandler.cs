@@ -13,10 +13,10 @@ namespace Service.Handlers.Commands;
 
 public class CreateVideoCommandHandler : IRequestHandler<CreateVideoRequest, CreateVideoResponse>
 {
-    private readonly ILingualLoopGenericRepository<Video> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<Video> _genericRepository;
+    private readonly StelindaContext _context;
 
-    public CreateVideoCommandHandler(ILingualLoopGenericRepository<Video> genericRepository)
+    public CreateVideoCommandHandler(IStelindaGenericRepository<Video> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();
@@ -28,7 +28,7 @@ public class CreateVideoCommandHandler : IRequestHandler<CreateVideoRequest, Cre
             video => new Video() { VideoUrl = video.VideoUrl, VideoTitle = video.VideoTitle});
         if (checkVideo != null)
         {
-            throw new LingualLoopException(ErrorCode.TheVideoWasRegistered.CreateMessage(checkVideo.VideoUrl, checkVideo.VideoTitle),
+            throw new StelindaException(ErrorCode.TheVideoWasRegistered.CreateMessage(checkVideo.VideoUrl, checkVideo.VideoTitle),
                 ErrorCode.TheVideoWasRegistered.GetDescription(checkVideo.VideoUrl, checkVideo.VideoTitle), HttpStatusCode.Conflict);
         }
 
@@ -43,7 +43,7 @@ public class CreateVideoCommandHandler : IRequestHandler<CreateVideoRequest, Cre
         var response = await _genericRepository.SaveChangesAsync(cancellationToken);
         if (response == 0)
         {
-            throw new LingualLoopException(ErrorCode.NoDataCreatedInVideos.CreateMessage(video.VideoUrl, video.VideoTitle),
+            throw new StelindaException(ErrorCode.NoDataCreatedInVideos.CreateMessage(video.VideoUrl, video.VideoTitle),
                 ErrorCode.NoDataCreatedInVideos.GetDescription(video.VideoUrl, video.VideoTitle), HttpStatusCode.InternalServerError);
         }
 

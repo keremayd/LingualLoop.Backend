@@ -15,9 +15,9 @@ namespace Service.Handlers.Queries;
 
 public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreRequest, GetKartyByScoreResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public GetKartyByScoreQueryHandler(ILingualLoopGenericRepository<KartyModel> kartyRepository, ILingualLoopGenericRepository<Postgres.Models.UserKartyHistory> ukhRepository)
+    public GetKartyByScoreQueryHandler(IStelindaGenericRepository<KartyModel> kartyRepository, IStelindaGenericRepository<Postgres.Models.UserKartyHistory> ukhRepository)
     {
         _context = kartyRepository.GetDbContext();
     }
@@ -62,7 +62,7 @@ public class GetKartyByScoreQueryHandler : IRequestHandler<GetKartyByScoreReques
 
         if (karty is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataFoundInKarty.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataFoundInKarty.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInKarty.GetDescription(request.UserId), HttpStatusCode.BadRequest);
         }
 

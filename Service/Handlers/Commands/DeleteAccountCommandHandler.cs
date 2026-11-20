@@ -34,13 +34,13 @@ namespace Service.Handlers.Commands;
 /// </summary>
 public class DeleteAccountCommandHandler : IRequestHandler<DeleteAccountRequest, DeleteAccountResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
     private readonly IAwsService _awsService;
     private readonly AppleTokenRevoker _appleRevoker;
     private readonly ILogger<DeleteAccountCommandHandler> _logger;
 
     public DeleteAccountCommandHandler(
-        ILingualLoopGenericRepository<User> userRepository,
+        IStelindaGenericRepository<User> userRepository,
         IAwsService awsService,
         AppleTokenRevoker appleRevoker,
         ILogger<DeleteAccountCommandHandler> logger)
@@ -57,7 +57,7 @@ public class DeleteAccountCommandHandler : IRequestHandler<DeleteAccountRequest,
         if (string.IsNullOrWhiteSpace(userId) ||
             !await _context.Users.AnyAsync(user => user.Id == userId, cancellationToken))
         {
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(userId),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(userId),
                 ErrorCode.NoDataInUsers.GetDescription(userId), HttpStatusCode.NotFound);
         }
 
@@ -135,7 +135,7 @@ public class DeleteAccountCommandHandler : IRequestHandler<DeleteAccountRequest,
         }
         if (string.IsNullOrWhiteSpace(request.AppleAuthorizationCode))
         {
-            throw new LingualLoopException(ErrorCode.AppleConsentRequired.CreateMessage(userId),
+            throw new StelindaException(ErrorCode.AppleConsentRequired.CreateMessage(userId),
                 ErrorCode.AppleConsentRequired.GetDescription(userId), HttpStatusCode.PreconditionRequired);
         }
 

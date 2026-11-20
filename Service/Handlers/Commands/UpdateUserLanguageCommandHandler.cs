@@ -17,9 +17,9 @@ namespace Service.Handlers.Commands;
 public class UpdateUserLanguageCommandHandler
     : IRequestHandler<UpdateUserLanguageRequest, UpdateUserLanguageResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public UpdateUserLanguageCommandHandler(ILingualLoopGenericRepository<UserSettings> repository)
+    public UpdateUserLanguageCommandHandler(IStelindaGenericRepository<UserSettings> repository)
     {
         _context = repository.GetDbContext();
     }

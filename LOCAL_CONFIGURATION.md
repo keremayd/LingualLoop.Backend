@@ -6,19 +6,19 @@ bilgileri, her projenin yanındaki **Git tarafından yok sayılan**
 
 Yeni makinede ilgili proje dizininde `appsettings.Local.json` oluşturup aşağıdaki
 alanları güvenli kaynağınızdan doldurun. Dosya .NET yapılandırmasıyla aynı iç içe
-JSON yapısını kullanır; örneğin `PostgresOptions:LingualLoopConnectionString`,
-`PostgresOptions` nesnesinin içindeki `LingualLoopConnectionString` alanıdır.
+JSON yapısını kullanır; örneğin `PostgresOptions:StelindaConnectionString`,
+`PostgresOptions` nesnesinin içindeki `StelindaConnectionString` alanıdır.
 
 | Proje | Alanlar |
 |---|---|
-| API | `PostgresOptions:LingualLoopConnectionString`, `JwtOptions:SecretKey`, `AwsOptions:AccessKey`, `AwsOptions:SecretKey` |
+| API | `PostgresOptions:StelindaConnectionString`, `JwtOptions:SecretKey`, `AwsOptions:AccessKey`, `AwsOptions:SecretKey` |
 | API içerik yönetimi | `KartyAdmin:ApiKey` — boş bırakılırsa içerik girişi ucu kapalı kalır |
-| Hangfire | `PostgresOptions:LingualLoopConnectionString`, `HangfireOptions:ConnectionString`, `AwsOptions:AccessKey`, `AwsOptions:SecretKey` |
+| Hangfire | `PostgresOptions:StelindaConnectionString`, `HangfireOptions:ConnectionString`, `AwsOptions:AccessKey`, `AwsOptions:SecretKey` |
 
 Yerel dosya derleme çıktısına kopyalanır; yayın paketine dahil edilmez. Ortam
 değişkenleri yerel dosyadan, komut satırı da ortam değişkenlerinden önceliklidir.
 Ortam değişkenlerinde bölüm ayıracı `__` kullanılır; örneğin
-`PostgresOptions__LingualLoopConnectionString`.
+`PostgresOptions__StelindaConnectionString`.
 
 API proje dizininden `dotnet run` ile 5214, Hangfire kendi proje dizininden
 `dotnet run` ile 5215 portunda çalışır. API'nin içerik kökü uygulama çıktı dizini,

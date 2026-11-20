@@ -18,7 +18,7 @@ public static class LivesRegeneration
         (long)LivesRules.RegenInterval.TotalSeconds;
 
     public static Task<int> MaterializeForUserAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ public static class LivesRegeneration
     }
 
     public static Task<int> MaterializeAllDueAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         DateTime utcNow,
         CancellationToken cancellationToken)
     {

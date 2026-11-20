@@ -10,10 +10,10 @@ namespace Service.Handlers.Commands;
 
 public class UploadPhotoByIdCommandHandler : IRequestHandler<UploadPhotoByIdRequest, UploadPhotoByIdResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _userRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _userRepository;
+    private readonly StelindaContext _context;
     
-    public UploadPhotoByIdCommandHandler(ILingualLoopGenericRepository<User> userRepository)
+    public UploadPhotoByIdCommandHandler(IStelindaGenericRepository<User> userRepository)
     {
         _userRepository = userRepository;
         _context = userRepository.GetDbContext();

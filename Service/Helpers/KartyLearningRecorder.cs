@@ -14,7 +14,7 @@ public sealed record KartyLearningRecord(UserKartyLearning Learning, bool Became
 public static class KartyLearningRecorder
 {
     public static async Task<KartyLearningRecord> RecordAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         int kartyId,
         CancellationToken cancellationToken)

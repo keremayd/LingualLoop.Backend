@@ -15,11 +15,11 @@ namespace Service.Handlers.Commands;
 
 public class EarnBadgeByIdCommandHandler : IRequestHandler<EarnBadgeByIdRequest, EarnBadgeByIdResponse>
 {
-    private readonly ILingualLoopGenericRepository<Badge> _badgeRepository;
-    private readonly ILingualLoopGenericRepository<UserBadge> _userBadgeRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<Badge> _badgeRepository;
+    private readonly IStelindaGenericRepository<UserBadge> _userBadgeRepository;
+    private readonly StelindaContext _context;
 
-    public EarnBadgeByIdCommandHandler(ILingualLoopGenericRepository<Badge> badgeRepository, ILingualLoopGenericRepository<UserBadge> userBadgeRepository)
+    public EarnBadgeByIdCommandHandler(IStelindaGenericRepository<Badge> badgeRepository, IStelindaGenericRepository<UserBadge> userBadgeRepository)
     {
         _badgeRepository = badgeRepository;
         _userBadgeRepository = userBadgeRepository;
@@ -40,7 +40,7 @@ public class EarnBadgeByIdCommandHandler : IRequestHandler<EarnBadgeByIdRequest,
         );
         
         if (badge == null)
-            throw new LingualLoopException(ErrorCode.NoDataFoundInBadge.CreateMessage(request.BadgeId),
+            throw new StelindaException(ErrorCode.NoDataFoundInBadge.CreateMessage(request.BadgeId),
                 ErrorCode.NoDataFoundInBadge.GetDescription(request.BadgeId), HttpStatusCode.InternalServerError);
         
         var entity = new UserBadge()
@@ -53,7 +53,7 @@ public class EarnBadgeByIdCommandHandler : IRequestHandler<EarnBadgeByIdRequest,
         _userBadgeRepository.Create(entity);
         var response = await _userBadgeRepository.SaveChangesAsync(cancellationToken);
         if (response == 0)
-            throw new LingualLoopException(ErrorCode.NoDataCreatedInUserBadge.CreateMessage(request.BadgeId, request.UserId),
+            throw new StelindaException(ErrorCode.NoDataCreatedInUserBadge.CreateMessage(request.BadgeId, request.UserId),
                 ErrorCode.NoDataCreatedInUserBadge.GetDescription(request.BadgeId, request.UserId), HttpStatusCode.InternalServerError);
 
         return new EarnBadgeByIdResponse()

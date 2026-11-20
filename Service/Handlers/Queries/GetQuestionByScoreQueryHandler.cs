@@ -14,11 +14,11 @@ namespace Service.Handlers.Queries;
 
 public class GetQuestionByScoreQueryHandler : IRequestHandler<GetQuestionByScoreRequest, GetQuestionByScoreResponse>
 {
-    private readonly ILingualLoopGenericRepository<Question> _genericRepository;
-    private readonly ILingualLoopGenericRepository<UserVideoHistory> _uvhRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<Question> _genericRepository;
+    private readonly IStelindaGenericRepository<UserVideoHistory> _uvhRepository;
+    private readonly StelindaContext _context;
 
-    public GetQuestionByScoreQueryHandler(ILingualLoopGenericRepository<Question> genericRepository, ILingualLoopGenericRepository<UserVideoHistory> uvhRepository)
+    public GetQuestionByScoreQueryHandler(IStelindaGenericRepository<Question> genericRepository, IStelindaGenericRepository<UserVideoHistory> uvhRepository)
     {
         _genericRepository = genericRepository;
         _uvhRepository = uvhRepository;
@@ -59,7 +59,7 @@ public class GetQuestionByScoreQueryHandler : IRequestHandler<GetQuestionByScore
         
         if (question is null)
         {
-            throw new LingualLoopException(ErrorCode.NoDataFoundInQuestions.CreateMessage(request.UserScore),
+            throw new StelindaException(ErrorCode.NoDataFoundInQuestions.CreateMessage(request.UserScore),
                 ErrorCode.NoDataFoundInQuestions.GetDescription(request.UserScore), HttpStatusCode.BadRequest);
         }
 

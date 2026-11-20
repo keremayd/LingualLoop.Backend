@@ -13,7 +13,7 @@ namespace Service.Helpers;
 public static class KartyUnitProgressReader
 {
     public static async Task<IReadOnlyList<KartyUnitSnapshot>> ReadAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         CancellationToken cancellationToken)
     {

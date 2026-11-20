@@ -22,7 +22,7 @@ public static class StreakWeekBuilder
     public const int Days = 7;
 
     public static async Task<List<StreakDayResponse>> BuildAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateOnly today,
         UserStreak? streak,

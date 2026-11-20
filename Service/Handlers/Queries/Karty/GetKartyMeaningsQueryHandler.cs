@@ -12,9 +12,9 @@ namespace Service.Handlers.Queries.Karty;
 public class GetKartyMeaningsQueryHandler
     : IRequestHandler<GetKartyMeaningsRequest, GetKartyMeaningsResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public GetKartyMeaningsQueryHandler(ILingualLoopGenericRepository<KartyModel> kartyRepository)
+    public GetKartyMeaningsQueryHandler(IStelindaGenericRepository<KartyModel> kartyRepository)
     {
         _context = kartyRepository.GetDbContext();
     }

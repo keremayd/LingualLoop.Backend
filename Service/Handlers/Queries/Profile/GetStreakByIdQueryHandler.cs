@@ -12,10 +12,10 @@ namespace Service.Handlers.Queries.Profile;
 public class GetStreakByIdQueryHandler
     : IRequestHandler<GetStreakByIdRequest, GetStreakByIdResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public GetStreakByIdQueryHandler(
-        ILingualLoopGenericRepository<UserStreak> userStreakRepository)
+        IStelindaGenericRepository<UserStreak> userStreakRepository)
     {
         _context = userStreakRepository.GetDbContext();
     }

@@ -13,10 +13,10 @@ namespace Service.Handlers.Commands;
 
 public class RecordWatchVideoByUserCommandHandler : IRequestHandler<RecordWatchVideoByUserRequest, RecordWatchVideoByUserResponse>
 {
-    private readonly ILingualLoopGenericRepository<UserVideoHistory> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<UserVideoHistory> _genericRepository;
+    private readonly StelindaContext _context;
 
-    public RecordWatchVideoByUserCommandHandler(ILingualLoopGenericRepository<UserVideoHistory> genericRepository)
+    public RecordWatchVideoByUserCommandHandler(IStelindaGenericRepository<UserVideoHistory> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();
@@ -47,7 +47,7 @@ public class RecordWatchVideoByUserCommandHandler : IRequestHandler<RecordWatchV
         var response = await _genericRepository.SaveChangesAsync(cancellationToken);
         if (response == 0)
         {
-            throw new LingualLoopException(ErrorCode.NoDataCreatedInUserVideoHistory.CreateMessage(request.VideoId, request.UserId),
+            throw new StelindaException(ErrorCode.NoDataCreatedInUserVideoHistory.CreateMessage(request.VideoId, request.UserId),
                 ErrorCode.NoDataCreatedInUserVideoHistory.GetDescription(request.VideoId, request.UserId), HttpStatusCode.InternalServerError);
         }
     

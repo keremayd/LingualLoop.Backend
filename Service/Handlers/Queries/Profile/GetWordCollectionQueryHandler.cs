@@ -14,10 +14,10 @@ public class GetWordCollectionQueryHandler
 {
     private const int PageSize = 20;
     private const int ArticleLearningGoal = KartyLeitner.ArticleLearningGoal;
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public GetWordCollectionQueryHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> learningRepository)
+        IStelindaGenericRepository<UserKartyLearning> learningRepository)
     {
         _context = learningRepository.GetDbContext();
     }

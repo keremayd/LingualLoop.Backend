@@ -14,11 +14,11 @@ namespace Service.Handlers.Commands;
 
 public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, UpdateScoreResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _userRepository;
-    private readonly ILingualLoopGenericRepository<UserScore> _userScoreRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _userRepository;
+    private readonly IStelindaGenericRepository<UserScore> _userScoreRepository;
+    private readonly StelindaContext _context;
     
-    public UpdateScoreCommandHandler(ILingualLoopGenericRepository<User> userRepository, ILingualLoopGenericRepository<UserScore> userScoreRepository)
+    public UpdateScoreCommandHandler(IStelindaGenericRepository<User> userRepository, IStelindaGenericRepository<UserScore> userScoreRepository)
     {
         _userScoreRepository = userScoreRepository;
         _userRepository = userRepository;
@@ -30,7 +30,7 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
         var user = await _userRepository.FirstAsync(u => u.Id == request.UserId,
             user => new User() { Id = user.Id, UserNickname = user.UserNickname, UserScore = user.UserScore});
         if (user is null)
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
                 ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         await UserScoreSchemaHelper.EnsureCreatedAsync(_context, cancellationToken);
@@ -38,7 +38,7 @@ public class UpdateScoreCommandHandler : IRequestHandler<UpdateScoreRequest, Upd
         var userScore = await _userScoreRepository.FirstAsync(u => u.UserId == request.UserId,
             response => new UserScore() { UserScoreId = response.UserScoreId, Score = response.Score, Experience = response.Experience, UserId = response.UserId });
         if (userScore == null)
-            throw new LingualLoopException(ErrorCode.NoDataInUserScores.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataInUserScores.CreateMessage(request.UserId),
                 ErrorCode.NoDataInUserScores.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         var utcNow = DateTime.UtcNow;

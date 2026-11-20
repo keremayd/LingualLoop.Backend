@@ -12,9 +12,9 @@ namespace Service.Handlers.Queries;
 
 public class GetBadgesByIdQueryHandler : IRequestHandler<GetBadgesByIdRequest, List<GetBadgesByIdResponse>>
 {
-    private readonly ILingualLoopGenericRepository<UserBadge> _userBadgeRepository;
+    private readonly IStelindaGenericRepository<UserBadge> _userBadgeRepository;
 
-    public GetBadgesByIdQueryHandler(ILingualLoopGenericRepository<UserBadge> userBadgeRepository)
+    public GetBadgesByIdQueryHandler(IStelindaGenericRepository<UserBadge> userBadgeRepository)
     {
         _userBadgeRepository = userBadgeRepository;
     }
@@ -33,7 +33,7 @@ public class GetBadgesByIdQueryHandler : IRequestHandler<GetBadgesByIdRequest, L
         );
 
         if (badgeList is null || !badgeList.Any())
-            throw new LingualLoopException(ErrorCode.NoDataFoundInUserBadge.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataFoundInUserBadge.CreateMessage(request.UserId),
                 ErrorCode.NoDataFoundInUserBadge.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         return badgeList.Select(b => new GetBadgesByIdResponse

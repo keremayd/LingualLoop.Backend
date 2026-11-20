@@ -10,11 +10,11 @@ namespace Service.Handlers.Queries.Authentication;
 
 public class GetUserByEmailQueryHandler : IRequestHandler<GetUserByEmailRequest, GetUserByEmailResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
 
 
-    public GetUserByEmailQueryHandler(ILingualLoopGenericRepository<User> genericRepository, LingualLoopContext context)
+    public GetUserByEmailQueryHandler(IStelindaGenericRepository<User> genericRepository, StelindaContext context)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();

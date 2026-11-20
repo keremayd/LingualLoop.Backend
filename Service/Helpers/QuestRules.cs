@@ -107,7 +107,7 @@ public static class QuestRules
     }
 
     public static async Task<QuestDayState> ReadDayStateAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         CancellationToken cancellationToken)
@@ -185,7 +185,7 @@ public static class QuestRules
         IstanbulDay.UtcRangeOf(utcNow);
 
     public static async Task<int> GetProgressAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         string questKey,
         DateTime utcNow,

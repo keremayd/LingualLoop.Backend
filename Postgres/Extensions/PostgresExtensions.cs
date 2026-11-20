@@ -15,19 +15,19 @@ public static class PostgresExtensions
         services.Configure<PostgresOptions>(configurationSection);
         PostgresOptions? postgresOptions = configurationSection.Get<PostgresOptions>();
 
-        if (postgresOptions == null || string.IsNullOrEmpty(postgresOptions?.LingualLoopConnectionString))
-            throw new Exception("LingualLoop options cannot be null or empty");
+        if (postgresOptions == null || string.IsNullOrEmpty(postgresOptions?.StelindaConnectionString))
+            throw new Exception("Stelinda options cannot be null or empty");
 
         return services
             .AddRepositories()
             .AddEntityFrameworkNpgsql()
-            .AddDbContext<LingualLoopContext>(options =>
-                options.UseNpgsql(postgresOptions.LingualLoopConnectionString, b => b.MigrationsAssembly("LingualLoop.Api")));
+            .AddDbContext<StelindaContext>(options =>
+                options.UseNpgsql(postgresOptions.StelindaConnectionString, b => b.MigrationsAssembly("Stelinda.Api")));
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
-            .AddScoped(typeof(ILingualLoopGenericRepository<>), typeof(LingualLoopGenericRepository<>));
+            .AddScoped(typeof(IStelindaGenericRepository<>), typeof(StelindaGenericRepository<>));
     }
 }

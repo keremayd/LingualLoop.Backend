@@ -48,12 +48,12 @@ public class CreateKartyCommandHandler
     private static readonly HashSet<string> AllowedArticles =
         new(StringComparer.OrdinalIgnoreCase) { "der", "die", "das" };
 
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
     private readonly IAwsService _awsService;
     private readonly ISpeechService _speechService;
 
     public CreateKartyCommandHandler(
-        ILingualLoopGenericRepository<KartyModel> kartyRepository,
+        IStelindaGenericRepository<KartyModel> kartyRepository,
         IAwsService awsService,
         ISpeechService speechService)
     {
@@ -86,7 +86,7 @@ public class CreateKartyCommandHandler
 
         if (existing is not null && !request.OverwriteExisting)
         {
-            throw new LingualLoopException(
+            throw new StelindaException(
                 ErrorCode.KartyAlreadyExists.CreateMessage(nounText),
                 ErrorCode.KartyAlreadyExists.GetDescription(nounText),
                 HttpStatusCode.Conflict);
@@ -135,7 +135,7 @@ public class CreateKartyCommandHandler
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            throw new LingualLoopException(
+            throw new StelindaException(
                 ErrorCode.KartyAssetUploadFailed.CreateMessage(exception.Message),
                 ErrorCode.KartyAssetUploadFailed.GetDescription(exception.Message),
                 HttpStatusCode.BadGateway);
@@ -253,7 +253,7 @@ public class CreateKartyCommandHandler
             if (unitId is null)
             {
                 var problem = $"{sequence}. ünite yok; önce admin/units/{sequence} ile açılmalı.";
-                throw new LingualLoopException(
+                throw new StelindaException(
                     ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
                     ErrorCode.KartyPayloadInvalid.GetDescription(problem),
                     HttpStatusCode.BadRequest);
@@ -311,7 +311,7 @@ public class CreateKartyCommandHandler
 
         if (problem is null) return;
 
-        throw new LingualLoopException(
+        throw new StelindaException(
             ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
             ErrorCode.KartyPayloadInvalid.GetDescription(problem),
             HttpStatusCode.BadRequest);

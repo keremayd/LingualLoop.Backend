@@ -18,10 +18,10 @@ namespace Service.Handlers.Commands.Profile;
 public class ResolveStreakFreezeCommandHandler
     : IRequestHandler<ResolveStreakFreezeRequest, RecordDailyActivityResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public ResolveStreakFreezeCommandHandler(
-        ILingualLoopGenericRepository<UserDailyActivity> userDailyActivityRepository)
+        IStelindaGenericRepository<UserDailyActivity> userDailyActivityRepository)
     {
         _context = userDailyActivityRepository.GetDbContext();
     }

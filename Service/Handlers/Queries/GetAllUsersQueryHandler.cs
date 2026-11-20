@@ -9,10 +9,10 @@ namespace Service.Handlers.Queries;
 
 public class GetAllUsersQueryHandler: IRequestHandler<GetAllUsersRequest, List<GetAllUsersResponse>>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
 
-    public GetAllUsersQueryHandler(ILingualLoopGenericRepository<User> genericRepository)
+    public GetAllUsersQueryHandler(IStelindaGenericRepository<User> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();

@@ -6,10 +6,10 @@ WORKDIR /app
 COPY . .
 
 # Restore işlemi
-RUN dotnet restore LingualLoop.Api.sln
+RUN dotnet restore Stelinda.Api.sln
 
 # Publish işlemi - API projesi için
-RUN dotnet publish LingualLoop.Api/LingualLoop.Api.csproj -c Release -o /app/out
+RUN dotnet publish Stelinda.Api/Stelinda.Api.csproj -c Release -o /app/out
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
@@ -20,4 +20,4 @@ COPY --from=build /app/out .
 
 EXPOSE 80
 
-ENTRYPOINT ["dotnet", "LingualLoop.Api.dll"]
+ENTRYPOINT ["dotnet", "Stelinda.Api.dll"]

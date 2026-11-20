@@ -15,11 +15,11 @@ namespace Service.Handlers.Commands;
 
 public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, ValidateUserResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
     private readonly UserManager<User> _userManager;
 
-    public ValidateUserCommandHandler(ILingualLoopGenericRepository<User> genericRepository, UserManager<User> userManager)
+    public ValidateUserCommandHandler(IStelindaGenericRepository<User> genericRepository, UserManager<User> userManager)
     {
         _genericRepository = genericRepository;
         _userManager = userManager;
@@ -30,12 +30,12 @@ public class ValidateUserCommandHandler : IRequestHandler<ValidateUserRequest, V
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(),
                 ErrorCode.NoDataInUsers.GetDescription(), HttpStatusCode.Unauthorized);
 
         var response = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!response)
-            throw new LingualLoopException(ErrorCode.TheUserAuthenticatedFailed.CreateMessage(),
+            throw new StelindaException(ErrorCode.TheUserAuthenticatedFailed.CreateMessage(),
                 ErrorCode.TheUserAuthenticatedFailed.GetDescription(), HttpStatusCode.Unauthorized);
         
         return new ValidateUserResponse()

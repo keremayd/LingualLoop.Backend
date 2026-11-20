@@ -14,10 +14,10 @@ namespace Service.Handlers.Commands;
 
 public class UpdateLivesCommandHandler : IRequestHandler<UpdateLivesRequest, UpdateLivesResponse>
 {
-    private readonly ILingualLoopGenericRepository<User> _userRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _userRepository;
+    private readonly StelindaContext _context;
 
-    public UpdateLivesCommandHandler(ILingualLoopGenericRepository<User> userRepository)
+    public UpdateLivesCommandHandler(IStelindaGenericRepository<User> userRepository)
     {
         _userRepository = userRepository;
         _context = userRepository.GetDbContext();
@@ -28,7 +28,7 @@ public class UpdateLivesCommandHandler : IRequestHandler<UpdateLivesRequest, Upd
         var user = await _userRepository.FirstAsync(u => u.Id == request.UserId,
             user => new User() { Id = user.Id, UserNickname = user.UserNickname, UserScore = user.UserScore});
         if (user is null)
-            throw new LingualLoopException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
+            throw new StelindaException(ErrorCode.NoDataInUsers.CreateMessage(request.UserId),
                 ErrorCode.NoDataInUsers.GetDescription(request.UserId), HttpStatusCode.BadRequest);
 
         var utcNow = DateTime.UtcNow;

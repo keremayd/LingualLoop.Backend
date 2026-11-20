@@ -9,10 +9,10 @@ namespace Service.Handlers.Queries.UserQueries;
 
 public class GetRankByUserIdQueryHandler : IRequestHandler<GetRankByUserIdRequest, int>
 {
-    private readonly ILingualLoopGenericRepository<User> _genericRepository;
-    private readonly LingualLoopContext _context;
+    private readonly IStelindaGenericRepository<User> _genericRepository;
+    private readonly StelindaContext _context;
     
-    public GetRankByUserIdQueryHandler(ILingualLoopGenericRepository<User> genericRepository)
+    public GetRankByUserIdQueryHandler(IStelindaGenericRepository<User> genericRepository)
     {
         _genericRepository = genericRepository;
         _context = genericRepository.GetDbContext();

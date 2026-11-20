@@ -25,10 +25,10 @@ namespace Service.Handlers.Commands.Karty;
 public class RecordKartyIntroductionCommandHandler
     : IRequestHandler<RecordKartyIntroductionRequest, RecordKartyIntroductionResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public RecordKartyIntroductionCommandHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> learningRepository)
+        IStelindaGenericRepository<UserKartyLearning> learningRepository)
     {
         _context = learningRepository.GetDbContext();
     }

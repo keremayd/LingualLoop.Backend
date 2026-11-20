@@ -22,10 +22,10 @@ namespace Service.Handlers.Commands.Karty;
 public class UpsertKartyUnitCommandHandler
     : IRequestHandler<UpsertKartyUnitRequest, UpsertKartyUnitResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public UpsertKartyUnitCommandHandler(
-        ILingualLoopGenericRepository<KartyUnit> unitRepository)
+        IStelindaGenericRepository<KartyUnit> unitRepository)
     {
         _context = unitRepository.GetDbContext();
     }
@@ -85,7 +85,7 @@ public class UpsertKartyUnitCommandHandler
     }
 
     private static void Fail(string problem) =>
-        throw new LingualLoopException(
+        throw new StelindaException(
             ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
             ErrorCode.KartyPayloadInvalid.GetDescription(problem),
             HttpStatusCode.BadRequest);

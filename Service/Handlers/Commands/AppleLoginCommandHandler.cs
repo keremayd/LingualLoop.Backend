@@ -56,7 +56,7 @@ public class AppleLoginCommandHandler : IRequestHandler<AppleLoginRequest, Apple
         {
             // Apple e-postayı yalnız ilk yetkilendirmede vermeyi bırakmış
             // olabilir; hesap e-postasız açılamıyor (RequireUniqueEmail).
-            throw new LingualLoopException(
+            throw new StelindaException(
                 ErrorCode.AppleIdentityInvalid.CreateMessage("e-posta yok"),
                 ErrorCode.AppleIdentityInvalid.GetDescription("e-posta yok"),
                 HttpStatusCode.BadRequest);
@@ -89,7 +89,7 @@ public class AppleLoginCommandHandler : IRequestHandler<AppleLoginRequest, Apple
                 ErrorCode = error.Code,
                 ErrorDescription = error.Description,
             }).ToList();
-            throw new LingualLoopException(
+            throw new StelindaException(
                 ErrorCode.TheUserNotCreatedInDatabase.CreateMessage(user.UserName),
                 errorList,
                 ErrorCode.TheUserNotCreatedInDatabase.GetDescription(),

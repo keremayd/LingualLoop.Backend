@@ -16,7 +16,7 @@ public static class QuestFreezeBonus
 
     /// <summary>Kullanıcının elindeki koruma ve tutabileceği en fazla koruma.</summary>
     public static async Task<(int Count, int Cap)> ReadFreezesAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ public static class QuestFreezeBonus
 
     /// <summary>Günün görevlerinden kaçı bitti, kaç görev var.</summary>
     public static async Task<(int Completed, int Total)> CountCompletedAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         IReadOnlyCollection<string> claimedToday,

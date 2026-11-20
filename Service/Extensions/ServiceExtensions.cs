@@ -26,7 +26,7 @@ public static class ServiceExtensions
                 options.Password.RequiredLength = 6;
                 options.User.RequireUniqueEmail = true;
             })
-            .AddEntityFrameworkStores<LingualLoopContext>()
+            .AddEntityFrameworkStores<StelindaContext>()
             .AddDefaultTokenProviders();
     }
 

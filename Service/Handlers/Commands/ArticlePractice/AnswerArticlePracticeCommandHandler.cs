@@ -12,10 +12,10 @@ namespace Service.Handlers.Commands.ArticlePractice;
 public class AnswerArticlePracticeCommandHandler
     : IRequestHandler<AnswerArticlePracticeRequest, AnswerArticlePracticeResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public AnswerArticlePracticeCommandHandler(
-        ILingualLoopGenericRepository<UserKartyLearning> learningRepository)
+        IStelindaGenericRepository<UserKartyLearning> learningRepository)
     {
         _context = learningRepository.GetDbContext();
     }

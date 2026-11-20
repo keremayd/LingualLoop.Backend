@@ -14,7 +14,7 @@ namespace Service.Helpers;
 public static class KartyUnitUnlockRecorder
 {
     public static async Task CaptureAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         CancellationToken cancellationToken)
     {

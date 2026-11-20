@@ -15,7 +15,7 @@ namespace Service.Helpers;
 public static class LeagueProgressSeeder
 {
     public static async Task<UserLeagueProgress> GetOrCreateAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         int seasonKey,
         DateTime utcNow,

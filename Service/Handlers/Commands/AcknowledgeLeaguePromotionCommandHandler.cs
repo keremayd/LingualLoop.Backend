@@ -11,10 +11,10 @@ namespace Service.Handlers.Commands;
 public class AcknowledgeLeaguePromotionCommandHandler
     : IRequestHandler<AcknowledgeLeaguePromotionRequest, AcknowledgeLeaguePromotionResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
     public AcknowledgeLeaguePromotionCommandHandler(
-        ILingualLoopGenericRepository<UserLeagueProgress> repository)
+        IStelindaGenericRepository<UserLeagueProgress> repository)
     {
         _context = repository.GetDbContext();
     }

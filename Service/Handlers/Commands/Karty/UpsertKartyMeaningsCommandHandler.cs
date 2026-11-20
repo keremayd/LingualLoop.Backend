@@ -22,9 +22,9 @@ namespace Service.Handlers.Commands.Karty;
 public class UpsertKartyMeaningsCommandHandler
     : IRequestHandler<UpsertKartyMeaningsRequest, UpsertKartyMeaningsResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public UpsertKartyMeaningsCommandHandler(ILingualLoopGenericRepository<KartyModel> kartyRepository)
+    public UpsertKartyMeaningsCommandHandler(IStelindaGenericRepository<KartyModel> kartyRepository)
     {
         _context = kartyRepository.GetDbContext();
     }
@@ -46,7 +46,7 @@ public class UpsertKartyMeaningsCommandHandler
             if (meaning.Length > KartyTranslationWriter.MaxLength)
             {
                 var problem = $"'{noun}' anlamı {KartyTranslationWriter.MaxLength} karakteri aşıyor.";
-                throw new LingualLoopException(
+                throw new StelindaException(
                     ErrorCode.KartyPayloadInvalid.CreateMessage(problem),
                     ErrorCode.KartyPayloadInvalid.GetDescription(problem),
                     HttpStatusCode.BadRequest);

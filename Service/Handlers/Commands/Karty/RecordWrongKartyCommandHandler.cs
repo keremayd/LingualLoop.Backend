@@ -11,9 +11,9 @@ namespace Service.Handlers.Commands.Karty;
 
 public class RecordWrongKartyCommandHandler : IRequestHandler<RecordWrongKartyRequest, RecordWrongKartyResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public RecordWrongKartyCommandHandler(ILingualLoopGenericRepository<UserKartyHistory> userKartyHistoryRepository)
+    public RecordWrongKartyCommandHandler(IStelindaGenericRepository<UserKartyHistory> userKartyHistoryRepository)
     {
         _context = userKartyHistoryRepository.GetDbContext();
     }

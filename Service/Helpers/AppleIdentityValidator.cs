@@ -125,7 +125,7 @@ public sealed class AppleIdentityValidator
 
     private bool Fresh() => _keys != null && DateTime.UtcNow - _keysFetchedAt < KeysLifetime;
 
-    private static LingualLoopException Invalid(string reason) =>
+    private static StelindaException Invalid(string reason) =>
         new(ErrorCode.AppleIdentityInvalid.CreateMessage(reason),
             ErrorCode.AppleIdentityInvalid.GetDescription(reason),
             HttpStatusCode.Unauthorized);

@@ -93,7 +93,7 @@ public static class KartyScheduler
     /// desteden.
     /// </summary>
     public static async Task<KartyPick> SelectAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         string userId,
         DateTime utcNow,
         KartyGameKey? game,
@@ -236,7 +236,7 @@ public static class KartyScheduler
     /// pekişince açılır.
     /// </summary>
     private static async Task<DeckState> DeckStateAsync(
-        LingualLoopContext context,
+        StelindaContext context,
         IReadOnlyList<KartyUnitSnapshot> units,
         KartyGameKey? game,
         IQueryable<int> seenKartyIds,

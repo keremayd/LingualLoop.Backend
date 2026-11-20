@@ -11,9 +11,9 @@ namespace Service.Handlers.Commands;
 
 public class ClaimQuestRewardCommandHandler : IRequestHandler<ClaimQuestRewardRequest, ClaimQuestRewardResponse>
 {
-    private readonly LingualLoopContext _context;
+    private readonly StelindaContext _context;
 
-    public ClaimQuestRewardCommandHandler(ILingualLoopGenericRepository<User> userRepository)
+    public ClaimQuestRewardCommandHandler(IStelindaGenericRepository<User> userRepository)
     {
         _context = userRepository.GetDbContext();
     }
